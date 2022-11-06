@@ -1,0 +1,44 @@
+site_name: Ellar
+site_description: Ellar - Python ASGI web framework for building fast, efficient and scalable RESTAPIs and server-side application.
+site_url: https://github.com/eadwinCode/ellar
+repo_name: eadwinCode/ellar
+repo_url: https://github.com/eadwinCode/ellar
+edit_uri: ''
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: pink
+      accent: pink
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: pink
+      accent: pink
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+
+  language: en
+  logo: img/Icon.svg
+  favicon: img/Icon.svg
+  icon:
+    repo: fontawesome/brands/git-alt
+
+plugins:
+- search
+
+nav:
+  - Introduction: index.md
+
+markdown_extensions:
+- codehilite
+- admonition
+- pymdownx.superfences
+extra_css:
+  - stylesheets/extra.css

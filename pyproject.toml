@@ -1,0 +1,79 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "ellar_cli"
+
+
+[project]
+name = "ellar-cli"
+authors = [
+   {name = "Ezeudoh Tochukwu", email = "tochukwu.ezeudoh@gmail.com"},
+]
+dynamic = ["version", "description"]
+requires-python = ">=3.7"
+readme = "README.md"
+home-page = "https://github.com/eadwinCode/ellar"
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3 :: Only",
+    "Framework :: AsyncIO",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+dependencies = [
+    "ellar >= 0.2.2",
+    # exclude 0.11.2 and 0.11.3 due to https://github.com/sdispater/tomlkit/issues/225
+    "tomlkit >=0.11.1,<1.0.0,!=0.11.2,!=0.11.3",
+    "uvicorn[standard] == 0.18.3",
+]
+
+[project.scripts]
+ellar = "ellar_cli.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/eadwinCode/ellar"
+Source = "https://github.com/eadwinCode/ellar"
+Homepage = "https://eadwincode.github.io/ellar/"
+
+[project.optional-dependencies]
+test = [
+    "pytest >=7.1.3,<8.0.0",
+    "pytest-cov >=2.12.0,<4.0.0",
+    "mypy ==0.971",
+    "flake8 >=3.8.3,<4.0.0",
+    "black ==22.8.0",
+    "isort >=5.0.6,<6.0.0",
+    "pytest-asyncio",
+    "autoflake",
+]
+dev = [
+    "pre-commit"
+]
+
+doc = [
+    "mkdocs",
+    "mkdocs-material >=7.1.9,<8.0.0",
+    "mdx-include >=1.4.1,<2.0.0",
+    "mkdocs-markdownextradata-plugin >=0.1.7,<0.3.0",
+    "markdown-include",
+    "mkdocstrings"
+]
