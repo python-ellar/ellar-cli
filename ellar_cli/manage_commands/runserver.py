@@ -5,6 +5,9 @@ import typing as t
 from pathlib import Path
 
 import typer
+from ellar.constants import ELLAR_CONFIG_MODULE, ELLAR_META, LOG_LEVELS
+from ellar.core import Config
+from ellar.helper.enums import create_enums_from_list
 from h11._connection import DEFAULT_MAX_INCOMPLETE_EVENT_SIZE
 from uvicorn.config import (
     HTTP_PROTOCOLS,
@@ -16,10 +19,6 @@ from uvicorn.config import (
     WS_PROTOCOLS,
 )
 from uvicorn.main import run as uvicorn_run
-
-from ellar.constants import ELLAR_CONFIG_MODULE, ELLAR_META, LOG_LEVELS
-from ellar.core import Config
-from ellar.helper.enums import create_enums_from_list
 
 from ..service import EllarCLIException, EllarCLIService
 

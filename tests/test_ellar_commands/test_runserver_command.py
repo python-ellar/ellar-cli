@@ -5,10 +5,10 @@ from unittest import mock
 
 import pytest
 
-from ellar.cli.service import EllarCLIService
+from ellar_cli.service import EllarCLIService
 
 HEADERS = "Content-Security-Policy:default-src 'self'; script-src https://example.com"
-runserver = importlib.import_module("ellar.cli.manage_commands.runserver")
+runserver = importlib.import_module("ellar_cli.manage_commands.runserver")
 
 
 def test_runserver_command_fails_for_py_project_none(process_runner):

@@ -50,9 +50,9 @@ dependencies = [
 ellar = "ellar_cli.cli:main"
 
 [project.urls]
-Documentation = "https://github.com/eadwinCode/ellar"
-Source = "https://github.com/eadwinCode/ellar"
-Homepage = "https://eadwincode.github.io/ellar/"
+Documentation = "https://github.com/eadwinCode/ellar-cli"
+Source = "https://github.com/eadwinCode/ellar-cli"
+Homepage = "https://eadwincode.github.io/ellar-cli/"
 
 [project.optional-dependencies]
 test = [

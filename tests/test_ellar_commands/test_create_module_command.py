@@ -1,6 +1,6 @@
 import os
 
-from ellar.cli.service import EllarCLIService
+from ellar_cli.service import EllarCLIService
 
 
 def test_create_module_fails_for_py_project_none(cli_runner):
@@ -56,12 +56,10 @@ def test_create_module_fails_for_existing_module_project_name(
 
 
 def test_create_module_fails_for_existing_directory_name(
-    tmpdir, cli_runner, write_empty_py_project
+    tmpdir, process_runner, write_empty_py_project
 ):
-    result = cli_runner.invoke_ellar_command(
-        ["create-project", "testing_new_project_three"]
-    )
-    assert result.exit_code == 0
+    result = process_runner(["ellar", "create-project", "testing_new_project_three"])
+    assert result.returncode == 0
     ellar_cli_service = EllarCLIService.import_project_meta("testing_new_project_three")
     module_name = "new_module_the_same_directory_name"
     os.makedirs(
@@ -69,11 +67,11 @@ def test_create_module_fails_for_existing_directory_name(
         exist_ok=True,
     )
 
-    result = cli_runner.invoke_ellar_command(
-        ["--project=testing_new_project_three", "create-module", module_name]
+    result = process_runner(
+        ["ellar", "--project=testing_new_project_three", "create-module", module_name]
     )
-    assert result.exit_code == 1
-    assert result.output == (
+    assert result.returncode == 1
+    assert result.stderr.decode("utf8") == (
         "Error: 'new_module_the_same_directory_name' conflicts with the name of an existing "
         "Python module and cannot be used as a module-name. Please try another module-name.\n"
     )

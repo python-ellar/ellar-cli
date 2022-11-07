@@ -3,8 +3,8 @@ import typing as t
 from jinja2 import Environment
 
 from ellar_cli.file_scaffolding import FileTemplateScaffold
-from ellar_cli.service import EllarCLIService
 from ellar_cli.schema import EllarScaffoldSchema
+from ellar_cli.service import EllarCLIService
 
 
 class DummyFileScaffolding(FileTemplateScaffold):

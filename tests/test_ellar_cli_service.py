@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from ellar.core import App, ConfigDefaultTypesMixin, ModuleBase
 
 from ellar_cli.service import (
     PY_PROJECT_TOML,
@@ -8,7 +9,6 @@ from ellar_cli.service import (
     EllarCLIService,
     EllarPyProject,
 )
-from ellar.core import App, ConfigDefaultTypesMixin, ModuleBase
 
 
 def test_import_project_meta_returns_default_when_py_project_is_none(tmp_path):

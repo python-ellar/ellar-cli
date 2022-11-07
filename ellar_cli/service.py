@@ -2,14 +2,14 @@ import os
 import typing as t
 
 from click import ClickException
+from ellar.constants import ELLAR_PY_PROJECT
+from ellar.core import App, Config, ModuleBase
+from ellar.helper.importer import import_from_string, module_import
+from ellar.helper.module_loading import module_dir
 from tomlkit import dumps as tomlkit_dumps, parse as tomlkit_parse, table
 from tomlkit.items import Table
 
-from ellar.constants import ELLAR_PY_PROJECT
-from ellar.core import App, Config, ModuleBase, schema
 from ellar_cli.schema import EllarPyProjectSerializer
-from ellar.helper.importer import import_from_string, module_import
-from ellar.helper.module_loading import module_dir
 
 PY_PROJECT_TOML = "pyproject.toml"
 ELLAR_DEFAULT_KEY = "default"
@@ -23,7 +23,9 @@ class EllarCLIException(ClickException):
 class EllarPyProject:
     def __init__(self, ellar: Table = None) -> None:
         self._ellar = ellar if ellar is not None else table()
-        self._projects = self._ellar.setdefault(ELLAR_PROJECTS_KEY, table())
+        self._projects = t.cast(
+            Table, self._ellar.setdefault(ELLAR_PROJECTS_KEY, table())
+        )
         self._default_project = self._ellar.get(ELLAR_DEFAULT_KEY, None)
 
     @classmethod
@@ -49,11 +51,11 @@ class EllarPyProject:
         return self._projects
 
     def get_project(self, project_name: str) -> Table:
-        return self._projects.get(project_name)
+        return t.cast(Table, self._projects.get(project_name))
 
     def get_or_create_project(self, project_name: str) -> Table:
         project = self._projects.setdefault(project_name.lower(), table())
-        return project
+        return t.cast(Table, project)
 
     def has_project(self, project_name: t.Optional[str]) -> bool:
         if not project_name:
@@ -65,7 +67,7 @@ class EllarPyProject:
 
 
 class EllarCLIService:
-    schema_cls: t.Type[schema.Serializer] = EllarPyProjectSerializer
+    schema_cls: t.Type[EllarPyProjectSerializer] = EllarPyProjectSerializer
 
     def __init__(
         self,
@@ -101,7 +103,7 @@ class EllarCLIService:
         cls, project: t.Optional[str] = None
     ) -> t.Optional["EllarCLIService"]:
         cwd = os.getcwd()
-        project_to_load: t.Optional[str] = None
+        project_to_load: str = "ellar"
         ellar_py_projects = None
 
         py_project_file_path = os.path.join(cwd, PY_PROJECT_TOML)
@@ -118,16 +120,13 @@ class EllarCLIService:
                     project
                 ) or ellar_py_projects.has_project(ellar_py_projects.default_project):
                     project_to_load = (
-                        project
+                        project  # type: ignore
                         if ellar_py_projects.has_project(project)
                         else ellar_py_projects.default_project
                     )
 
-                    _ellar_pyproject_serializer = t.cast(
-                        EllarPyProjectSerializer,
-                        cls.schema_cls.parse_obj(
-                            ellar_py_projects.get_project(project_to_load)
-                        ),
+                    _ellar_pyproject_serializer = cls.schema_cls.parse_obj(
+                        ellar_py_projects.get_project(project_to_load)
                     )
 
             return cls(
@@ -137,6 +136,7 @@ class EllarCLIService:
                 app_name=project_to_load,
                 ellar_py_projects=ellar_py_projects,
             )
+        return None
 
     def create_ellar_project_meta(self, project_name: str) -> None:
         pyproject_table = EllarCLIService.read_py_project(self.py_project_path)
@@ -173,6 +173,7 @@ class EllarCLIService:
             with open(path, mode="r") as fp:
                 table_content = tomlkit_parse(fp.read())
                 return table_content
+        return None
 
     @staticmethod
     def write_py_project(path: str, content: Table) -> None:
@@ -180,25 +181,32 @@ class EllarCLIService:
             fw.writelines(tomlkit_dumps(content))
 
     def import_application(self) -> "App":
-        application_module = import_from_string(self._meta.application)
+        assert self._meta
+        application_module = t.cast("App", import_from_string(self._meta.application))
         return application_module
 
     def import_configuration(self) -> t.Type["Config"]:
-        config = import_from_string(self._meta.config)
+        assert self._meta
+        config = t.cast(t.Type["Config"], import_from_string(self._meta.config))
         return config
 
     def get_application_config(self) -> "Config":
+        assert self._meta
         config = Config(self._meta.config)
         return config
 
     def import_root_module(self) -> t.Type["ModuleBase"]:
-        root_module = import_from_string(self._meta.root_module)
+        assert self._meta
+        root_module = t.cast(
+            t.Type["ModuleBase"], import_from_string(self._meta.root_module)
+        )
         return root_module
 
     def import_apps_module(self) -> t.Any:
+        assert self._meta
         apps_module = module_import(self._meta.apps_module)
         return apps_module
 
     def get_apps_module_path(self) -> str:
         apps_module = self.import_apps_module()
-        return module_dir(apps_module)
+        return module_dir(apps_module)  # type: ignore

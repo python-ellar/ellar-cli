@@ -3,13 +3,12 @@ import sys
 import typing as t
 
 import typer
-from typer import Typer
-from typer.models import CommandInfo
-
 from ellar.commands import EllarTyper
 from ellar.constants import CALLABLE_COMMAND_INFO, ELLAR_META, MODULE_METADATA
 from ellar.core.factory import AppFactory
 from ellar.services import Reflector
+from typer import Typer
+from typer.models import CommandInfo
 
 from .manage_commands import create_module, create_project, runserver
 from .service import EllarCLIService
@@ -35,7 +34,7 @@ def typer_callback(
         help="Run Specific Command on a specific project",
     ),
 ) -> None:
-    meta_: EllarCLIService = EllarCLIService.import_project_meta(project)
+    meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(project)
     ctx.meta[ELLAR_META] = meta_
 
 
@@ -54,7 +53,7 @@ def build_typers() -> None:
     except Exception:
         raise typer.Abort()
 
-    meta_: EllarCLIService = EllarCLIService.import_project_meta(app_name)
+    meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(app_name)
 
     if meta_ and meta_.has_meta:
         modules = AppFactory.get_all_modules(meta_.import_root_module())

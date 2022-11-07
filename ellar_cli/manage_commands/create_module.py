@@ -4,14 +4,14 @@ import typing as t
 from importlib import import_module
 
 import typer
-
 from ellar.constants import ELLAR_META
-from ellar_cli import scaffolding
-from ellar_cli.schema import EllarScaffoldSchema
 from ellar.helper.module_loading import module_dir
 
-from ..service import EllarCLIException, EllarCLIService
+from ellar_cli import scaffolding
+from ellar_cli.schema import EllarScaffoldSchema
+
 from ..file_scaffolding import FileTemplateScaffold
+from ..service import EllarCLIException, EllarCLIService
 
 __all__ = ["create_module"]
 

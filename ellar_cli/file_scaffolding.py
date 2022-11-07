@@ -12,7 +12,7 @@ __all__ = ["FileTemplateScaffold"]
 
 
 class ProjectScaffoldContext(dict):
-    def __init__(self, environment: Environment, **kwargs):
+    def __init__(self, environment: Environment, **kwargs: t.Any) -> None:
         super().__init__(kwargs)
         self.environment = environment
         self.environment.globals.update(kwargs)
@@ -27,7 +27,7 @@ class FileTemplateScaffold:
         working_directory: str,
         scaffold_ellar_template_root_path: str,
         ellar_cli_service: EllarCLIService,
-    ):
+    ) -> None:
         self._schema = schema
         self._working_project_name = working_project_name
         self._ctx = ProjectScaffoldContext(
@@ -78,7 +78,10 @@ class FileTemplateScaffold:
             assert self._ctx[context], f"{context} template context is missing."
 
     def create_directory(
-        self, file: EllarScaffoldList, scaffold_ellar_template_path, working_directory
+        self,
+        file: EllarScaffoldList,
+        scaffold_ellar_template_path: str,
+        working_directory: str,
     ) -> None:
         name = file.name
         if name in self._ctx:

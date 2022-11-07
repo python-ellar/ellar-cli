@@ -1,4 +1,5 @@
 import pytest
+
 from ellar_cli.scaffolding.scaffolding_json_validator import (
     SCAFFOLDING_TEMPLATES,
     ScaffoldingJSONValidator,

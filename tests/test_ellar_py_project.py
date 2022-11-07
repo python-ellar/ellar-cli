@@ -1,8 +1,8 @@
+from ellar.constants import ELLAR_PY_PROJECT
 from tomlkit import table
 from tomlkit.items import Table
 
 from ellar_cli.service import EllarPyProject
-from ellar.constants import ELLAR_PY_PROJECT
 
 
 def test_get_or_create_ellar_py_project(mock_py_project_table):

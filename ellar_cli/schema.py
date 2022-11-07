@@ -1,8 +1,7 @@
 import typing as t
 
-from pydantic import Field
-
 from ellar.serializer import Serializer
+from pydantic import Field
 
 
 class EllarPyProjectSerializer(Serializer):

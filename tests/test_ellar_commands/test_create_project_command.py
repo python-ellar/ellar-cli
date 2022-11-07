@@ -1,7 +1,8 @@
 import os
 
-from ellar.cli.service import EllarCLIService
 from ellar.core import App
+
+from ellar_cli.service import EllarCLIService
 
 
 def test_create_project_fails_for_py_project_none(cli_runner):
@@ -45,10 +46,10 @@ def test_create_project_fails_for_existing_module_project_name(
     )
 
 
-def test_create_project_command_works(tmpdir, cli_runner, write_empty_py_project):
-    result = cli_runner.invoke_ellar_command(["create-project", "ellar_project"])
-    assert result.exit_code == 0
-    assert result.output == (
+def test_create_project_command_works(tmpdir, process_runner, write_empty_py_project):
+    result = process_runner(["ellar", "create-project", "ellar_project"])
+    assert result.returncode == 0
+    assert result.stdout.decode("utf8") == (
         "`ellar_project` project scaffold completed. To start your server, run the command below\n"
         "ellar --project ellar_project runserver --reload\n"
         "Happy coding!\n"
