@@ -18,25 +18,23 @@ def test_create_module_fails_if_no_project_is_found(cli_runner, write_empty_py_p
 
 
 def test_create_module_fails_for_invalid_module_name(
-    cli_runner, write_empty_py_project
+    process_runner, write_empty_py_project
 ):
-    result = cli_runner.invoke_ellar_command(["create-project", "testing_new_project"])
-    assert result.exit_code == 0
-    result = cli_runner.invoke_ellar_command(["create-module", "testing-new-module"])
-    assert result.exit_code == 1
-    assert result.output == (
+    result = process_runner(["ellar", "create-project", "testing_new_project"])
+    assert result.returncode == 0
+    result = process_runner(["ellar", "create-module", "testing-new-module"])
+    assert result.returncode == 1
+    assert result.stderr.decode("utf8") == (
         "Error: 'testing-new-module' is not a valid module-name. "
         "Please make sure the module-name is a valid identifier.\n"
     )
 
 
 def test_create_module_fails_for_existing_module_project_name(
-    cli_runner, write_empty_py_project
+    process_runner, write_empty_py_project
 ):
-    result = cli_runner.invoke_ellar_command(
-        ["create-project", "testing_new_project_two"]
-    )
-    assert result.exit_code == 0
+    result = process_runner(["ellar", "create-project", "testing_new_project_two"])
+    assert result.returncode == 0
     ellar_cli_service = EllarCLIService.import_project_meta("testing_new_project_two")
     module_name = "new_module_name"
     with open(
@@ -45,11 +43,11 @@ def test_create_module_fails_for_existing_module_project_name(
     ) as fp:
         fp.write("")
 
-    result = cli_runner.invoke_ellar_command(
-        ["--project=testing_new_project_two", "create-module", module_name]
+    result = process_runner(
+        ["ellar", "--project=testing_new_project_two", "create-module", module_name]
     )
-    assert result.exit_code == 1
-    assert result.output == (
+    assert result.returncode == 1
+    assert result.stderr.decode("utf8") == (
         "Error: 'new_module_name' conflicts with the name of an existing "
         "Python module and cannot be used as a module-name. Please try another module-name.\n"
     )

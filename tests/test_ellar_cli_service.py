@@ -24,7 +24,7 @@ def test_import_project_meta_returns_default_when_py_project_does_not_have_ellar
     assert ellar_cli_service._meta is None
     assert ellar_cli_service.py_project_path == os.path.join(tmpdir, PY_PROJECT_TOML)
     assert ellar_cli_service.cwd == tmpdir
-    assert ellar_cli_service.app is None
+    assert ellar_cli_service.app == "ellar"
     assert ellar_cli_service.ellar_py_projects.default_project is None
     assert ellar_cli_service.ellar_py_projects.has_default_project is False
 
