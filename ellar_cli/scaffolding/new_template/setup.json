@@ -1,5 +1,5 @@
 {
-  "context": ["folder_name"],
+  "context": ["folder_name", "project_name"],
   "files": [
     {
       "name": "folder_name",

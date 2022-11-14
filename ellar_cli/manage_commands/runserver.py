@@ -1,12 +1,10 @@
-import os
 import ssl
 import sys
 import typing as t
 from pathlib import Path
 
 import typer
-from ellar.constants import ELLAR_CONFIG_MODULE, ELLAR_META, LOG_LEVELS
-from ellar.core import Config
+from ellar.constants import LOG_LEVELS
 from ellar.helper.enums import create_enums_from_list
 from h11._connection import DEFAULT_MAX_INCOMPLETE_EVENT_SIZE
 from uvicorn.config import (
@@ -19,6 +17,8 @@ from uvicorn.config import (
     WS_PROTOCOLS,
 )
 from uvicorn.main import run as uvicorn_run
+
+from ellar_cli.constants import ELLAR_META
 
 from ..service import EllarCLIException, EllarCLIService
 
@@ -41,9 +41,6 @@ def runserver(
     ),
     port: int = typer.Option(8000, help="Bind socket to this port.", show_default=True),
     uds: t.Optional[str] = typer.Option(None, help="Bind to a UNIX domain socket."),
-    config_module: t.Optional[str] = typer.Option(
-        None, help="Application Configuration Module"
-    ),
     fd: t.Optional[int] = typer.Option(
         None, help="Bind to socket from this file descriptor."
     ),
@@ -249,13 +246,9 @@ def runserver(
             "No available project found. please create ellar project with `ellar create-project 'project-name'`"
         )
 
-    _possible_config_module = ellar_project_meta.project_meta.config
     application = None if factory else ellar_project_meta.project_meta.application
 
-    config_module_global = (
-        os.environ.get(ELLAR_CONFIG_MODULE) or _possible_config_module
-    )
-    config = Config(config_module=config_module or config_module_global)
+    config = ellar_project_meta.get_application_config()
 
     log_config = config.LOGGING_CONFIG
     _log_level = config.LOG_LEVEL

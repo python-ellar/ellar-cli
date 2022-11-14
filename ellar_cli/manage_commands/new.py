@@ -64,7 +64,9 @@ class NewTemplateScaffold(FileTemplateScaffold):
             raise EllarCLIException(message)
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
-        template_context = dict(folder_name=working_project_name)
+        template_context = dict(
+            folder_name=working_project_name, project_name=self.get_project_name()
+        )
         return template_context
 
     def get_project_name(self) -> str:

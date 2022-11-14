@@ -2,7 +2,7 @@ import os
 import typing as t
 
 from click import ClickException
-from ellar.constants import ELLAR_PY_PROJECT
+from ellar.constants import ELLAR_CONFIG_MODULE, ELLAR_PY_PROJECT
 from ellar.core import App, Config, ModuleBase
 from ellar.helper.importer import import_from_string, module_import
 from ellar.helper.module_loading import module_dir
@@ -192,7 +192,7 @@ class EllarCLIService:
 
     def get_application_config(self) -> "Config":
         assert self._meta
-        config = Config(self._meta.config)
+        config = Config(os.environ.get(ELLAR_CONFIG_MODULE, self._meta.config))
         return config
 
     def import_root_module(self) -> t.Type["ModuleBase"]:

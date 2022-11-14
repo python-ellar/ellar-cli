@@ -4,10 +4,10 @@ import uuid
 from importlib import import_module
 
 import typer
-from ellar.constants import ELLAR_META
 from ellar.helper.module_loading import module_dir
 
 from ellar_cli import scaffolding
+from ellar_cli.constants import ELLAR_META
 from ellar_cli.schema import EllarScaffoldSchema
 
 from ..file_scaffolding import FileTemplateScaffold
