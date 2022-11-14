@@ -7,7 +7,7 @@ ellar create-project my_new_project
 
 will create a folder as follows:
 ```angular2html
-john_doe
+my_new_project
 ├── apps
 |   └── __init__.py
 ├── core

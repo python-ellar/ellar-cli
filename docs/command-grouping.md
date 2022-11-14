@@ -1,8 +1,9 @@
 
 Ella CLI provides a way by which commands can be grouped together. 
-For instance, a `db` command may have sub-commands like `makemigrations`, `migrate` etc.
 
-To group a command, create a file `commands.py` in root project
+For instance, a `db` command may have sub-commands like `makemigrations`, `migrate`, `reset-db` etc.
+
+To achieve this use-case, create a file `commands.py` in root project
 ```python
 from ellar.commands import EllarTyper
 
