@@ -14,7 +14,7 @@ class EllarPyProjectSerializer(Serializer):
 
 class EllarScaffoldList(Serializer):
     name: str
-    is_directory: bool
+    is_directory: bool = False
     name_in_context: t.Optional[bool] = Field(default=None, alias="name-context")
     files: t.Optional[t.List["EllarScaffoldList"]]
 
@@ -34,7 +34,6 @@ class EllarScaffoldSchema(Serializer):
                 dict(name="sample.ellar", is_directory=False),
                 dict(
                     name="sample",
-                    is_directory=False,
                     files=[
                         dict(
                             dict(name="sample.ellar", is_directory=False),

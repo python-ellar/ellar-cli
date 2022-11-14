@@ -4,19 +4,21 @@ import typing as t
 
 import typer
 from ellar.commands import EllarTyper
-from ellar.constants import CALLABLE_COMMAND_INFO, ELLAR_META, MODULE_METADATA
+from ellar.constants import CALLABLE_COMMAND_INFO, MODULE_METADATA
 from ellar.core.factory import AppFactory
 from ellar.services import Reflector
 from typer import Typer
 from typer.models import CommandInfo
 
-from .manage_commands import create_module, create_project, runserver
+from ellar_cli.constants import ELLAR_META
+
+from .manage_commands import create_module, create_project, new_command, runserver
 from .service import EllarCLIService
 
 __all__ = ["build_typers", "_typer", "typer_callback"]
 
 _typer = Typer(name="ellar")
-
+_typer.command(name="new")(new_command)
 _typer.command()(runserver)
 _typer.command(name="create-project")(create_project)
 _typer.command(name="create-module")(create_module)

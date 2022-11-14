@@ -1,0 +1,26 @@
+{
+  "context": ["folder_name", "project_name"],
+  "files": [
+    {
+      "name": "folder_name",
+      "is_directory": "true",
+      "files": [
+        {
+          "name": "pyproject.toml"
+        },
+        {
+          "name": "README.md"
+        },
+        {
+          "name": "tests",
+          "is_directory": "true",
+          "files": [
+            {
+              "name": "conftest.ellar"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

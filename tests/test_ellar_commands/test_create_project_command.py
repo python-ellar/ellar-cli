@@ -46,6 +46,21 @@ def test_create_project_fails_for_existing_module_project_name(
     )
 
 
+def test_create_project_works_for_existing_folder_with_same_project_name(
+    tmpdir, cli_runner, write_empty_py_project
+):
+    module_name = "new_project_module_2"
+    os.makedirs(os.path.join(tmpdir, module_name), exist_ok=True)
+
+    result = cli_runner.invoke_ellar_command(["create-project", module_name])
+    assert result.exit_code == 0
+    assert result.output == (
+        "`new_project_module_2` project scaffold completed. To start your server, run the command below\n"
+        "ellar --project new_project_module_2 runserver --reload\n"
+        "Happy coding!\n"
+    )
+
+
 def test_create_project_command_works(tmpdir, process_runner, write_empty_py_project):
     result = process_runner(["ellar", "create-project", "ellar_project"])
     assert result.returncode == 0

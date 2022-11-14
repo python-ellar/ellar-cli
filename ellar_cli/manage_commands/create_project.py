@@ -4,10 +4,10 @@ import uuid
 from importlib import import_module
 
 import typer
-from ellar.constants import ELLAR_META
 from ellar.helper.module_loading import module_dir
 
 from ellar_cli import scaffolding
+from ellar_cli.constants import ELLAR_META
 from ellar_cli.schema import EllarScaffoldSchema
 
 from ..file_scaffolding import FileTemplateScaffold
@@ -30,13 +30,19 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
 
     def validate_project_name(self) -> None:
         if not self._working_project_name.isidentifier():
-            message = "'{name}' is not a valid project-name. Please make sure the project-name is a valid identifier.".format(
-                name=self._working_project_name,
+            message = (
+                "'{name}' is not a valid project-name. "
+                "Please make sure the project-name is a valid identifier.".format(
+                    name=self._working_project_name
+                )
             )
             raise EllarCLIException(message)
         # Check it cannot be imported.
         try:
-            import_module(self._working_project_name)
+            xyz = import_module(self._working_project_name)
+            if not xyz.__spec__.origin:
+                # proceed
+                raise ImportError()
         except ImportError:
             pass
         else:

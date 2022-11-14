@@ -26,7 +26,7 @@ class FileTemplateScaffold:
         working_project_name: str,
         working_directory: str,
         scaffold_ellar_template_root_path: str,
-        ellar_cli_service: EllarCLIService,
+        ellar_cli_service: t.Optional[EllarCLIService] = None,
     ) -> None:
         self._schema = schema
         self._working_project_name = working_project_name
@@ -55,7 +55,7 @@ class FileTemplateScaffold:
 
     def create_file(self, base_path: str, file_name: str, content: t.Any) -> None:
         with open(
-            os.path.join(base_path, file_name.replace("ellar", "py")), mode="w"
+            os.path.join(base_path, file_name.replace(".ellar", ".py")), mode="w"
         ) as fw:
             refined_content = self._ctx.environment.from_string(content).render()
             fw.writelines(refined_content)

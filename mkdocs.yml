@@ -1,8 +1,8 @@
-site_name: Ellar
-site_description: Ellar - Python ASGI web framework for building fast, efficient and scalable RESTAPIs and server-side application.
-site_url: https://github.com/eadwinCode/ellar
-repo_name: eadwinCode/ellar
-repo_url: https://github.com/eadwinCode/ellar
+site_name: Ellar CLI
+site_description: Ellar CLI Tool for Scaffolding Ellar Projects and Modules and also running Ellar Commands.
+site_url: https://github.com/eadwinCode/ellar-cli
+repo_name: eadwinCode/ellar-cli
+repo_url: https://github.com/eadwinCode/ellar-cli
 edit_uri: ''
 
 theme:
@@ -35,6 +35,13 @@ plugins:
 
 nav:
   - Introduction: index.md
+  - Commands:
+      - new: new-command.md
+      - create project: create-project-command.md
+      - create module: create-module-command.md
+      - runserver: runserver-command.md
+  - Custom Commands: custom-commands.md
+  - Command Grouping: command-grouping.md
 
 markdown_extensions:
 - codehilite
