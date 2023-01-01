@@ -1,6 +1,5 @@
 from ellar.common import Module, exception_handler
 from ellar.core import ModuleBase
-from ellar.core.connection import Request
 from ellar.core.context import IExecutionContext
 from ellar.core.response import JSONResponse, Response
 from ellar.samples.modules import HomeModule
