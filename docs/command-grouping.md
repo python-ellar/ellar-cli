@@ -1,9 +1,10 @@
 
-Ella CLI provides a way by which commands can be grouped together. 
+Ella CLI provides a way by which commands can be grouped.
 
 For instance, a `db` command may have sub-commands like `makemigrations`, `migrate`, `reset-db` etc.
 
-To achieve this use-case, create a file `commands.py` in root project
+To achieve this use-case, let us create a file `commands.py` in the root level of the project.
+
 ```python
 from ellar.commands import EllarTyper
 
@@ -18,7 +19,13 @@ def makemigrations():
 def migrate():
     """Applies Migrations"""
 ```
-in `ApplicationModule`, add the command to `Module` commands parameter 
+
+## Register EllarTyper Command
+
+Lets, make the `db` visible on the CLI.
+
+In other for Ellar CLI to identify custom command, its has to be registered to a `@Module` class.
+
 ```python
 from ellar.common import Module
 from ellar.core import ModuleBase
@@ -28,10 +35,12 @@ from .commands import db
 class ApplicationModule(ModuleBase):
     pass
 ```
+
 open your terminal and navigate to project directory and run the command below
 ```shell
 ellar db --help
 ```
+
 command output
 ```shell
 Usage: Ellar, Python Web framework db [OPTIONS] COMMAND [ARGS]...

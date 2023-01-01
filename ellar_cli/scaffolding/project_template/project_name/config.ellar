@@ -10,7 +10,7 @@ import typing as t
 
 from pydantic.json import ENCODERS_BY_TYPE as encoders_by_type
 from starlette.middleware import Middleware
-
+from ellar.core.exceptions import IExceptionHandler
 from ellar.core import ConfigDefaultTypesMixin, JSONResponse
 from ellar.core.versioning import BaseAPIVersioning, DefaultAPIVersioning
 
@@ -45,16 +45,20 @@ class BaseConfig(ConfigDefaultTypesMixin):
     # static route path
     STATIC_MOUNT_PATH: str = "/static"
 
+    CORS_ALLOW_ORIGINS: t.List[str] = ["*"]
+    CORS_ALLOW_METHODS: t.List[str] = ["*"]
+    CORS_ALLOW_HEADERS: t.List[str] = ["*"]
+    ALLOWED_HOSTS: t.List[str] = ["*"]
+
     # Application middlewares
     MIDDLEWARE: t.Sequence[Middleware] = []
 
     # A dictionary mapping either integer status codes,
     # or exception class types onto callables which handle the exceptions.
     # Exception handler callables should be of the form
-    # `handler(request, exc) -> response` and may be be either standard functions, or async functions.
-    USER_CUSTOM_EXCEPTION_HANDLERS: t.Dict[
-        t.Union[int, t.Type[Exception]], t.Callable
-    ] = {}
+    # `handler(context:IExecutionContext, exc: Exception) -> response` 
+    # and may be either standard functions, or async functions.
+    EXCEPTION_HANDLERS: t.List[IExceptionHandler] = []
 
     # Object Serializer custom encoders
     SERIALIZER_CUSTOM_ENCODER: t.Dict[
