@@ -1,5 +1,6 @@
 
-This is command is a wrapper around `uvicorn` ASGI server. it helps to create a link necessary for `uvicorn` to run your ellar application properly.
+This is command is a wrapper around the `UVICORN` ASGI server. It helps to create a link necessary for `UVICORN` to run your Ellar application properly.
+
 ```shell
 ellar runserver --reload
 ```

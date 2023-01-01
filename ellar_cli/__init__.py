@@ -1,3 +1,3 @@
 """Ellar CLI Tool for Scaffolding Ellar Projects, Modules and also running Ellar Commands"""
 
-__version__ = "0.0.6"
+__version__ = "0.0.8"

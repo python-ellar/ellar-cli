@@ -1,10 +1,27 @@
-This is a quick example of how to create a custom command. Also, hints on working of ella cli.
+In this section, we are going to go over how to create a custom command and throw more light on how Ella CLI works.
 
-Ellar CLI tools is a wrapper round [typer](), 
-so it's easy to get CLI context available in the command action.
-Ellar CLI exposes some cli context necessary for validation and interacting with ellar project.
+## Create Custom Command
+Let's create a file called `commands.py` at the root level of the project.
 
-Create a file `commands.py` in root project
+```python
+# project_name/commands.py
+
+from ellar.common import command
+
+@command
+def my_new_command():
+    """my_new_command cli description """
+```
+
+## Custom Command with Context
+
+Ellar CLI tools is a wrapper round [typer](https://typer.tiangolo.com/).
+So, therefore, we can easily get the command context by adding a parameter with the annotation of `typer.Context`
+
+Ellar CLI adds some meta-data CLI context that provides an interface for interaction with the Ellar project.
+
+For example:
+
 ```python
 import typing as t
 import typer
@@ -14,14 +31,26 @@ from ellar_cli.constants import ELLAR_META
 
 @command
 def my_new_command(ctx:typer.Context):
-    """my_new_command cli description """
+    """my_new_command CLI Description """
     ellar_cli_service = t.cast(t.Optional[EllarCLIService], ctx.meta.get(ELLAR_META))
+    app = ellar_cli_service.import_application()
 ```
-`ellar_cli_service` holds ellar project meta-data
-Lets, make the `my_new_command` visible on the cli.
+`EllarCLIService` is an Ellar CLI meta-data for interacting with Ellar project.
 
-In `ApplicationModule`, add the command to `Module` commands parameter 
+Some important method that may be of interest:
+
+- `import_application`: returns application instance.
+- `get_application_config`: gets current application config.
+
+## Register a Custom Command
+
+Lets, make the `my_new_command` visible on the CLI.
+In other for Ellar CLI to identify custom command, its has to be registered to a `@Module` class.
+
+For example:
+
 ```python
+# project_name/root_module.py
 from ellar.common import Module
 from ellar.core import ModuleBase
 from .commands import my_new_command
@@ -30,10 +59,12 @@ from .commands import my_new_command
 class ApplicationModule(ModuleBase):
     pass
 ```
+
 open your terminal and navigate to project directory and run the command below
 ```shell
-ellar db --help
+ellar --help
 ```
+
 command output
 ```shell
 Usage: Ellar, Python Web framework [OPTIONS] COMMAND [ARGS]...
@@ -50,7 +81,7 @@ Options:
 Commands:
   create-module   - Scaffolds Ellar Application Module -
   create-project  - Scaffolds Ellar Application -
-  my-new-command  my_new_command cli description
+  my-new-command  - my_new_command cli description
   new             - Runs a complete Ellar project scaffold and creates...
   runserver       - Starts Uvicorn Server -
   say-hi 
