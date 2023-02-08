@@ -10,6 +10,7 @@ application = AppFactory.create_from_app_module(
     config_module=os.environ.get(
         ELLAR_CONFIG_MODULE, "{{project_name}}.config:DevelopmentConfig"
     ),
+    global_guards=[]
 )
 
 # uncomment this section if you want API documentation
