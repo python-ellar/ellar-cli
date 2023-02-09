@@ -40,7 +40,7 @@ def typer_callback(
     ctx.meta[ELLAR_META] = meta_
 
 
-def build_typers() -> None:
+def build_typers() -> t.Any:
     try:
         options, args = getopt.getopt(
             sys.argv[1:],
@@ -53,7 +53,9 @@ def build_typers() -> None:
             if k in ["-p", "--project"] and v:
                 app_name = v
     except Exception:
-        raise typer.Abort()
+        typer.Abort()
+        return 1
+
 
     meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(app_name)
 
