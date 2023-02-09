@@ -56,7 +56,6 @@ def build_typers() -> t.Any:
         typer.Abort()
         return 1
 
-
     meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(app_name)
 
     if meta_ and meta_.has_meta:
