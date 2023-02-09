@@ -44,9 +44,6 @@ def runserver(
     fd: t.Optional[int] = typer.Option(
         None, help="Bind to socket from this file descriptor."
     ),
-    debug: bool = typer.Option(
-        False, help="Enable debug mode.", is_flag=True, hidden=True
-    ),
     reload: bool = typer.Option(False, help="Enable auto-reload.", is_flag=True),
     reload_dirs: t.List[Path] = typer.Option(
         [],
@@ -272,7 +269,6 @@ def runserver(
         log_level=_log_level.name,
         access_log=access_log,
         interface=interface.value,
-        debug=debug,
         reload=reload,
         reload_dirs=reload_dirs or None,
         reload_includes=reload_includes or None,
