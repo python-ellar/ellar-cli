@@ -30,8 +30,9 @@ from .controllers import {{module_name | capitalize}}Controller
     routers=[],
 )
 class {{module_name | capitalize}}Module(ModuleBase):
-    def register_providers(self, container: Container) -> None:
-        # for more complicated provider registrations
-        # container.register_instance(...)
-        pass
+    """
+    {{module_name | capitalize}} Module
+    """
 
+    def register_providers(self, container: Container) -> None:
+        """for more complicated provider registrations, use container.register_instance(...) """
