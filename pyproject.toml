@@ -69,12 +69,3 @@ test = [
 dev = [
     "pre-commit"
 ]
-
-doc = [
-    "mkdocs",
-    "mkdocs-material >=7.1.9,<8.0.0",
-    "mdx-include >=1.4.1,<2.0.0",
-    "mkdocs-markdownextradata-plugin >=0.1.7,<0.3.0",
-    "markdown-include",
-    "mkdocstrings"
-]
