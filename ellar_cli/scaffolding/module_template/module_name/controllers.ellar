@@ -14,7 +14,7 @@ from ellar.core import ControllerBase
 
 @Controller
 class {{module_name | capitalize}}Controller(ControllerBase):
+
     @get("/")
     def index(self):
         return {"detail": "Welcome {{module_name | capitalize}} Resource"}
-

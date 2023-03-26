@@ -34,10 +34,6 @@ test: ## Run tests
 test-cov: ## Run tests with coverage
 	pytest --cov=ellar_cli --cov-report term-missing tests
 
-doc-deploy: ## Run Deploy Documentation
-	make clean
-	mkdocs gh-deploy --force --ignore-version
-
 
 pre-commit-lint: ## Runs Requires commands during pre-commit
 	make clean
