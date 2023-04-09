@@ -4,13 +4,13 @@ import typing as t
 from pathlib import Path
 
 import typer
-from ellar.constants import LOG_LEVELS
 from ellar.helper.enums import create_enums_from_list
 from h11._connection import DEFAULT_MAX_INCOMPLETE_EVENT_SIZE
 from uvicorn.config import (
     HTTP_PROTOCOLS,
     INTERFACES,
     LIFESPAN,
+    LOG_LEVELS,
     LOGGING_CONFIG,
     LOOP_SETUPS,
     SSL_PROTOCOL_VERSION,
@@ -32,6 +32,8 @@ LOOP_CHOICES = create_enums_from_list(
     "LOOP_CHOICES", *[key for key in LOOP_SETUPS.keys() if key != "none"]
 )
 INTERFACE_CHOICES = create_enums_from_list("INTERFACES", *INTERFACES)
+_LOG_LEVELS = dict(**LOG_LEVELS, NOT_SET=0)
+LOG_LEVELS_CHOICES = create_enums_from_list("LOG_LEVELS", *list(_LOG_LEVELS.keys()))
 
 
 def runserver(
@@ -112,8 +114,8 @@ def runserver(
     env_file: t.Optional[Path] = typer.Option(
         None, show_default=True, exists=True, help="Environment configuration file."
     ),
-    log_level: t.Optional[LOG_LEVELS] = typer.Option(
-        None,
+    log_level: LOG_LEVELS_CHOICES = typer.Option(
+        LOG_LEVELS_CHOICES.NOT_SET.value,
         show_default=True,
         help="Log level. [default: None]",
     ),
@@ -266,7 +268,7 @@ def runserver(
         lifespan=lifespan.value,
         env_file=env_file,
         log_config=LOGGING_CONFIG if log_config is None else log_config,
-        log_level=_log_level.name,
+        log_level=_log_level.value if _log_level.value != "NOT_SET" else None,
         access_log=access_log,
         interface=interface.value,
         reload=reload,

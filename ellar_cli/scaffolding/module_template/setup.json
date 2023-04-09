@@ -28,6 +28,9 @@
           "is_directory": "true",
           "files": [
             {
+              "name": "__init__.ellar"
+            },
+            {
               "name": "test_controllers.ellar"
             },
             {
