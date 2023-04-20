@@ -7,7 +7,7 @@ from ellar.commands import EllarTyper
 from ellar.constants import CALLABLE_COMMAND_INFO, MODULE_METADATA
 from ellar.core.factory import AppFactory
 from ellar.core.modules import ModuleSetup
-from ellar.services import Reflector
+from ellar.core.services import Reflector
 from typer import Typer
 from typer.models import CommandInfo
 
