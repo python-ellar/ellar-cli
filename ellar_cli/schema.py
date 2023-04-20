@@ -1,6 +1,6 @@
 import typing as t
 
-from ellar.serializer import Serializer
+from ellar.core.serializer import Serializer
 from pydantic import Field
 
 
