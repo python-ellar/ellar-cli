@@ -10,8 +10,8 @@ import typing as t
 
 from pydantic.json import ENCODERS_BY_TYPE as encoders_by_type
 from starlette.middleware import Middleware
-from ellar.core.exceptions import IExceptionHandler
-from ellar.core import ConfigDefaultTypesMixin, JSONResponse
+from ellar.common import IExceptionHandler, JSONResponse
+from ellar.core import ConfigDefaultTypesMixin
 from ellar.core.versioning import BaseAPIVersioning, DefaultAPIVersioning
 
 
@@ -68,4 +68,3 @@ class BaseConfig(ConfigDefaultTypesMixin):
 
 class DevelopmentConfig(BaseConfig):
     DEBUG: bool = True
-

@@ -4,7 +4,7 @@ import typing as t
 from importlib import import_module
 
 import typer
-from ellar.helper.module_loading import module_dir
+from ellar.common.helper.module_loading import module_dir
 
 from ellar_cli import scaffolding
 from ellar_cli.constants import ELLAR_META

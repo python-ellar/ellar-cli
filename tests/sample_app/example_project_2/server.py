@@ -1,6 +1,6 @@
 import os
 
-from ellar.constants import ELLAR_CONFIG_MODULE
+from ellar.common.constants import ELLAR_CONFIG_MODULE
 from ellar.core.factory import AppFactory
 
 # from ellar.openapi import OpenAPIDocumentModule, OpenAPIDocumentBuilder

@@ -1,5 +1,4 @@
-from ellar.commands import EllarTyper
-from ellar.common import command
+from ellar.common import EllarTyper, command
 
 db = EllarTyper(name="db")
 
