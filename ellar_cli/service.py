@@ -2,13 +2,14 @@ import os
 import typing as t
 
 from click import ClickException
-from ellar.constants import ELLAR_CONFIG_MODULE, ELLAR_PY_PROJECT
+from ellar.common.constants import ELLAR_CONFIG_MODULE
+from ellar.common.helper.importer import import_from_string, module_import
+from ellar.common.helper.module_loading import module_dir
 from ellar.core import App, Config, ModuleBase
-from ellar.helper.importer import import_from_string, module_import
-from ellar.helper.module_loading import module_dir
 from tomlkit import dumps as tomlkit_dumps, parse as tomlkit_parse, table
 from tomlkit.items import Table
 
+from ellar_cli.constants import ELLAR_PY_PROJECT
 from ellar_cli.schema import EllarPyProjectSerializer
 
 PY_PROJECT_TOML = "pyproject.toml"

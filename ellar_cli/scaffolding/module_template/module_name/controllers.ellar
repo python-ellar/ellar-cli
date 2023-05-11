@@ -8,8 +8,7 @@ class MyController(ControllerBase):
     def index(self):
         return {'detail': "Welcome Dog's Resources"}
 """
-from ellar.common import Controller, get
-from ellar.core import ControllerBase
+from ellar.common import Controller, ControllerBase, get
 
 
 @Controller

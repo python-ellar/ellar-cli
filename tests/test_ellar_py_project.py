@@ -1,7 +1,7 @@
-from ellar.constants import ELLAR_PY_PROJECT
 from tomlkit import table
 from tomlkit.items import Table
 
+from ellar_cli.constants import ELLAR_PY_PROJECT
 from ellar_cli.service import EllarPyProject
 
 
