@@ -1,27 +1,9 @@
 import os
 
-from ellar_cli.service import EllarCLIService
-
-
-def test_create_module_fails_for_py_project_none(cli_runner):
-    result = cli_runner.invoke_ellar_command(["create-module", "testing_new_module"])
-    assert result.exit_code == 1
-    assert result.output == "Error: No pyproject.toml file found.\n"
-
-
-def test_create_module_fails_if_no_project_is_found(cli_runner, write_empty_py_project):
-    result = cli_runner.invoke_ellar_command(["create-module", "testing_new_module"])
-    assert result.exit_code == 1
-    assert result.output == (
-        "Error: No available project found. please create ellar project with `ellar create-project 'project-name'`\n"
-    )
-
 
 def test_create_module_fails_for_invalid_module_name(
     process_runner, write_empty_py_project
 ):
-    result = process_runner(["ellar", "create-project", "testing_new_project"])
-    assert result.returncode == 0
     result = process_runner(["ellar", "create-module", "testing-new-module"])
     assert result.returncode == 1
     assert result.stderr.decode("utf8") == (
@@ -30,15 +12,53 @@ def test_create_module_fails_for_invalid_module_name(
     )
 
 
-def test_create_module_fails_for_existing_module_project_name(
-    process_runner, write_empty_py_project
-):
-    result = process_runner(["ellar", "create-project", "testing_new_project_two"])
+def test_create_module_with_directory_case_1(process_runner, tmpdir):
+    result = process_runner(["ellar", "create-module", "test_new_module", "app/"])
     assert result.returncode == 0
-    ellar_cli_service = EllarCLIService.import_project_meta("testing_new_project_two")
+    assert result.stdout == b"test_new_module module completely scaffolded\n"
+
+    module_path = os.path.join(tmpdir, "app", "test_new_module")
+    files = os.listdir(module_path)
+
+    for file in [
+        "module.py",
+        "tests",
+        "routers.py",
+        "services.py",
+        "controllers.py",
+        "schemas.py",
+        "__init__.py",
+    ]:
+        assert file in files
+
+
+def test_create_module_with_directory_case_2(process_runner, tmpdir):
+    result = process_runner(
+        ["ellar", "create-module", "test_new_module", "."], cwd=tmpdir
+    )
+    assert result.returncode == 0
+    assert result.stdout == b"test_new_module module completely scaffolded\n"
+
+    files = os.listdir(tmpdir / "test_new_module")
+
+    for file in [
+        "module.py",
+        "tests",
+        "routers.py",
+        "services.py",
+        "controllers.py",
+        "schemas.py",
+        "__init__.py",
+    ]:
+        assert file in files
+
+
+def test_create_module_fails_for_existing_module_project_name(
+    process_runner, write_empty_py_project, tmp_path
+):
     module_name = "new_module_name"
     with open(
-        os.path.join(ellar_cli_service.get_apps_module_path(), module_name + ".py"),
+        os.path.join(tmp_path, module_name + ".py"),
         mode="w",
     ) as fp:
         fp.write("")
@@ -56,12 +76,9 @@ def test_create_module_fails_for_existing_module_project_name(
 def test_create_module_fails_for_existing_directory_name(
     tmpdir, process_runner, write_empty_py_project
 ):
-    result = process_runner(["ellar", "create-project", "testing_new_project_three"])
-    assert result.returncode == 0
-    ellar_cli_service = EllarCLIService.import_project_meta("testing_new_project_three")
     module_name = "new_module_the_same_directory_name"
     os.makedirs(
-        os.path.join(ellar_cli_service.get_apps_module_path(), module_name),
+        os.path.join(tmpdir, module_name),
         exist_ok=True,
     )
 
@@ -76,8 +93,6 @@ def test_create_module_fails_for_existing_directory_name(
 
 
 def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
-    result = process_runner(["ellar", "create-project", "test_project_new_module"])
-    assert result.returncode == 0
 
     result = process_runner(
         [
@@ -90,10 +105,7 @@ def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
     assert result.returncode == 0
     assert result.stdout == b"test_new_module module completely scaffolded\n"
 
-    ellar_cli_service = EllarCLIService.import_project_meta("test_project_new_module")
-    module_path = os.path.join(
-        ellar_cli_service.get_apps_module_path(), "test_new_module"
-    )
+    module_path = os.path.join(tmpdir, "test_new_module")
     files = os.listdir(module_path)
 
     for file in [
@@ -107,9 +119,7 @@ def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
     ]:
         assert file in files
 
-    module_test_path = os.path.join(
-        ellar_cli_service.get_apps_module_path(), "test_new_module", "tests"
-    )
+    module_test_path = os.path.join(tmpdir, "test_new_module", "tests")
     test_files = os.listdir(module_test_path)
     for file in ["test_routers.py", "test_services.py", "test_controllers.py"]:
         assert file in test_files

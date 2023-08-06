@@ -3,8 +3,7 @@ import typing as t
 
 from click import ClickException
 from ellar.common.constants import ELLAR_CONFIG_MODULE
-from ellar.common.helper.importer import import_from_string, module_import
-from ellar.common.helper.module_loading import module_dir
+from ellar.common.helper.importer import import_from_string
 from ellar.core import App, Config, ModuleBase
 from tomlkit import dumps as tomlkit_dumps, parse as tomlkit_parse, table
 from tomlkit.items import Table
@@ -41,8 +40,8 @@ class EllarPyProject:
         return self._ellar.get(ELLAR_DEFAULT_KEY, None) is not None
 
     @property
-    def default_project(self) -> str:
-        return self._ellar.get(ELLAR_DEFAULT_KEY, None)
+    def default_project(self) -> t.Optional[str]:
+        return self._ellar.get(ELLAR_DEFAULT_KEY) or None
 
     @default_project.setter
     def default_project(self, value: str) -> None:
@@ -163,7 +162,6 @@ class EllarCLIService:
         ellar_new_project.add(
             "root-module", f"{project_name}.root_module:ApplicationModule"
         )
-        ellar_new_project.add("apps-module", f"{project_name}.apps")
 
         # TODO: lock pyproject.toml file
         EllarCLIService.write_py_project(self.py_project_path, pyproject_table)
@@ -202,12 +200,3 @@ class EllarCLIService:
             t.Type["ModuleBase"], import_from_string(self._meta.root_module)
         )
         return root_module
-
-    def import_apps_module(self) -> t.Any:
-        assert self._meta
-        apps_module = module_import(self._meta.apps_module)
-        return apps_module
-
-    def get_apps_module_path(self) -> str:
-        apps_module = self.import_apps_module()
-        return module_dir(apps_module)  # type: ignore

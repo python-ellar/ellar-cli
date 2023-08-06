@@ -22,7 +22,6 @@ def test_new_command_works(tmpdir, process_runner):
         "application": "ellar_project_new.server:application",
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
-        "apps_module": "ellar_project_new.apps",
     }
 
 
@@ -43,7 +42,6 @@ def test_new_command_works_with_specific_directory(tmpdir, process_runner):
         "application": "ellar_project_new.server:application",
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
-        "apps_module": "ellar_project_new.apps",
     }
 
 
@@ -71,7 +69,6 @@ def test_new_command_works_with_specific_directory_case_2(tmpdir, process_runner
         "application": "ellar_project_new.server:application",
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
-        "apps_module": "ellar_project_new.apps",
     }
 
 

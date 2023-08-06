@@ -8,12 +8,13 @@ from ellar_cli.service import EllarCLIService
 
 
 class DummyFileScaffolding(FileTemplateScaffold):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, ellar_cli_service: EllarCLIService, **kwargs):
         self._validate_project_name_called = False
         self._on_scaffold_completed_called = False
         self._on_scaffold_started_called = False
         self._create_directory_called = False
         self._create_file_called = False
+        self.ellar_cli_service = ellar_cli_service
         super(DummyFileScaffolding, self).__init__(*args, **kwargs)
 
     def get_scaffolding_context(self, working_project_name: str):
@@ -50,6 +51,7 @@ def test_validation_executed(tmp_path, write_empty_py_project):
         schema=EllarScaffoldSchema.schema_example(),
         ellar_cli_service=ellar_cli_service,
     )
+    dummy.scaffold()
     assert dummy._validate_project_name_called
     assert isinstance(dummy._ctx.environment, Environment)
     assert dummy._ctx == dict(whatever_name="dummy")

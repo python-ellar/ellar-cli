@@ -9,7 +9,6 @@ class EllarPyProjectSerializer(Serializer):
     application: str = Field(alias="application")
     config: str = Field(alias="config")
     root_module: str = Field(alias="root-module")
-    apps_module: str = Field(alias="apps-module")
 
 
 class EllarScaffoldList(Serializer):

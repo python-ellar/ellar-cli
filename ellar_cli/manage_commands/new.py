@@ -29,6 +29,17 @@ class NewTemplateScaffold(FileTemplateScaffold):
         )
         self._project_name = project_name
 
+    def create_file(self, base_path: str, file_name: str, content: t.Any) -> None:
+        _path = os.path.join(base_path, file_name.replace(".ellar", ".py"))
+        if os.path.exists(_path):
+            content = self.read_file_content(path=_path)
+
+        with open(
+            os.path.join(base_path, file_name.replace(".ellar", ".py")), mode="w"
+        ) as fw:
+            refined_content = self._ctx.environment.from_string(content).render()
+            fw.writelines(refined_content)
+
     def on_scaffold_completed(self) -> None:
         popen_res = subprocess.run(
             ["ellar", "create-project", self.get_project_name()],
@@ -68,6 +79,8 @@ class NewTemplateScaffold(FileTemplateScaffold):
         )
         if os.path.isdir(working_project_dir):
             items = os.listdir(working_project_dir)
+            exclude = ["poetry.lock", "pyproject.toml"]
+            items = [item for item in items if item not in exclude]
             return len(items) == 0
         return True
 

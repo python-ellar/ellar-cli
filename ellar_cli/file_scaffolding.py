@@ -7,8 +7,6 @@ from jinja2 import Environment
 
 from ellar_cli.schema import EllarScaffoldList, EllarScaffoldSchema
 
-from .service import EllarCLIService
-
 __all__ = ["FileTemplateScaffold"]
 
 
@@ -27,14 +25,12 @@ class FileTemplateScaffold:
         working_project_name: str,
         working_directory: str,
         scaffold_ellar_template_root_path: str,
-        ellar_cli_service: t.Optional[EllarCLIService] = None,
         specified_directory: str = None,
     ) -> None:
         self._specified_directory = specified_directory
         self._schema = schema
         self._ctx = ProjectScaffoldContext(Environment())
         self._scaffold_ellar_template_root_path = scaffold_ellar_template_root_path
-        self.ellar_cli_service = ellar_cli_service
 
         if self._specified_directory:
             _cwd_path = Path(self._get_working_cwd(working_directory))
