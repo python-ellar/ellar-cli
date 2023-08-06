@@ -24,8 +24,10 @@ class NewTemplateScaffold(FileTemplateScaffold):
     unwanted_chars = "".join(["-", ";", "!", "*", ":", " "])
 
     def __init__(self, project_name: str = None, **kwargs: t.Any) -> None:
+        super(NewTemplateScaffold, self).__init__(
+            working_project_name=project_name, **kwargs
+        )
         self._project_name = project_name
-        super(NewTemplateScaffold, self).__init__(**kwargs)
 
     def on_scaffold_completed(self) -> None:
         popen_res = subprocess.run(
@@ -36,9 +38,18 @@ class NewTemplateScaffold(FileTemplateScaffold):
         )
         if popen_res.returncode == 0:
             project_working_project_name = self.get_project_name()
+
+            log_1 = f"- cd {self._working_project_name}"
+            if self._specified_directory:
+                log_1 = (
+                    f"- cd {self._specified_directory.lower()}"
+                    if self._specified_directory != "."
+                    else ""
+                )
+
             print(
-                f"`{self._working_project_name}` project created successfully.\n"
-                f"- cd {self._working_project_name}"
+                f"`{project_working_project_name}` project created successfully.\n"
+                f"{log_1}"
             )
             print("To start your server, run the command below")
             print(
@@ -47,10 +58,32 @@ class NewTemplateScaffold(FileTemplateScaffold):
         else:
             print(popen_res.stderr.decode("utf8"))
 
+    def is_directory_empty(self) -> bool:
+        """
+        Check if the given directory is empty.
+        """
+        # Get the list of files and directories in the directory
+        working_project_dir = os.path.join(
+            self._working_directory, self._working_project_name
+        )
+        if os.path.isdir(working_project_dir):
+            items = os.listdir(working_project_dir)
+            return len(items) == 0
+        return True
+
     def validate_project_name(self) -> None:
         if os.path.exists(self._working_project_name):
             message = "A folder with same name exist '{name}' ".format(
                 name=self._working_project_name
+            )
+            raise EllarCLIException(message)
+
+        if not self.is_directory_empty():
+            working_project_dir = os.path.join(
+                self._working_directory, self._working_project_name
+            )
+            message = (
+                f"Scaffolding Project Directory is not empty. - {working_project_dir}"
             )
             raise EllarCLIException(message)
 
@@ -78,10 +111,14 @@ class NewTemplateScaffold(FileTemplateScaffold):
 
 
 def new_command(
-    folder_name: str,
-    project_name: t.Optional[str] = typer.Option(
+    project_name: str = typer.Argument(
         None,
-        help="Project Module Name. Defaults to `folder-name` if not set",
+        help="Project Module Name. Defaults to `project-name` if not set",
+        show_default=False,
+    ),
+    directory: t.Optional[str] = typer.Argument(
+        None,
+        help="The name of a new directory to scaffold the project into. Scaffolding into an existing directory is only allowed if the directory is empty",
         show_default=False,
     ),
 ):
@@ -91,7 +128,7 @@ def new_command(
         schema=schema,
         working_directory=os.getcwd(),
         scaffold_ellar_template_root_path=root_scaffold_template_path,
-        working_project_name=folder_name.lower(),
         project_name=project_name,
+        specified_directory=directory,
     )
     init_template_scaffold.scaffold()

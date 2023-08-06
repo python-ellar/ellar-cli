@@ -9,13 +9,62 @@ def test_new_command_works(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new"])
     assert result.returncode == 0
     assert result.stdout.decode("utf8") == (
-        "`ellar-project-new` project created successfully.\n"
+        "`ellar_project_new` project created successfully.\n"
         "- cd ellar-project-new\n"
         "To start your server, run the command below\n"
         "- ellar --project ellar_project_new runserver --reload\n"
         "Happy coding!\n"
     )
     os.chdir(os.path.join(tmpdir, "ellar-project-new"))
+    ellar_cli_service = EllarCLIService.import_project_meta()
+    assert ellar_cli_service._meta.dict() == {
+        "project_name": "ellar_project_new",
+        "application": "ellar_project_new.server:application",
+        "config": "ellar_project_new.config:DevelopmentConfig",
+        "root_module": "ellar_project_new.root_module:ApplicationModule",
+        "apps_module": "ellar_project_new.apps",
+    }
+
+
+def test_new_command_works_with_specific_directory(tmpdir, process_runner):
+    result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
+    assert result.returncode == 0
+    assert result.stdout.decode("utf8") == (
+        "`ellar_project_new` project created successfully.\n"
+        "- cd another/me\n"
+        "To start your server, run the command below\n"
+        "- ellar --project ellar_project_new runserver --reload\n"
+        "Happy coding!\n"
+    )
+    os.chdir(os.path.join(tmpdir / "another/me"))
+    ellar_cli_service = EllarCLIService.import_project_meta()
+    assert ellar_cli_service._meta.dict() == {
+        "project_name": "ellar_project_new",
+        "application": "ellar_project_new.server:application",
+        "config": "ellar_project_new.config:DevelopmentConfig",
+        "root_module": "ellar_project_new.root_module:ApplicationModule",
+        "apps_module": "ellar_project_new.apps",
+    }
+
+
+def test_new_command_fails_case_1(tmpdir, process_runner):
+    result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
+    assert result.returncode == 0
+    result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
+    assert result.returncode == 1
+    assert "Scaffolding Project Directory is not empty." in result.stderr.decode("utf8")
+
+
+def test_new_command_works_with_specific_directory_case_2(tmpdir, process_runner):
+    result = process_runner(["ellar", "new", "ellar-project-new", "."])
+    assert result.returncode == 0
+    assert result.stdout.decode("utf8") == (
+        "`ellar_project_new` project created successfully.\n\n"
+        "To start your server, run the command below\n"
+        "- ellar --project ellar_project_new runserver --reload\n"
+        "Happy coding!\n"
+    )
+    os.chdir(os.path.join(tmpdir))
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict() == {
         "project_name": "ellar_project_new",
@@ -49,7 +98,7 @@ def test_new_template_scaffold_get_project_name():
         schema=EllarScaffoldSchema.schema_example(),
         working_directory=os.getcwd(),
         scaffold_ellar_template_root_path="",
-        working_project_name="folder-name".lower(),
+        project_name="folder-name".lower(),
     )
     assert init_template_scaffold.get_project_name() == "folder_name"
     init_template_scaffold._project_name = "folder-name!;-:*"
@@ -62,6 +111,6 @@ def test_new_template_scaffold_get_project_cwd():
         schema=EllarScaffoldSchema.schema_example(),
         working_directory="working-directory",
         scaffold_ellar_template_root_path="",
-        working_project_name="folder-name".lower(),
+        project_name="folder-name".lower(),
     )
     assert init_template_scaffold.get_project_cwd() == "working-directory/folder-name"
