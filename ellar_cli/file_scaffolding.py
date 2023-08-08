@@ -1,12 +1,11 @@
 import os
 import typing as t
 from abc import abstractmethod
+from pathlib import Path
 
 from jinja2 import Environment
 
 from ellar_cli.schema import EllarScaffoldList, EllarScaffoldSchema
-
-from .service import EllarCLIService
 
 __all__ = ["FileTemplateScaffold"]
 
@@ -26,17 +25,20 @@ class FileTemplateScaffold:
         working_project_name: str,
         working_directory: str,
         scaffold_ellar_template_root_path: str,
-        ellar_cli_service: t.Optional[EllarCLIService] = None,
+        specified_directory: t.Optional[str] = None,
     ) -> None:
+        self._specified_directory = specified_directory
         self._schema = schema
-        self._working_project_name = working_project_name
-        self._ctx = ProjectScaffoldContext(
-            Environment(), **self.get_scaffolding_context(working_project_name)
-        )
-        self._working_directory = working_directory
+        self._ctx = ProjectScaffoldContext(Environment())
         self._scaffold_ellar_template_root_path = scaffold_ellar_template_root_path
-        self.ellar_cli_service = ellar_cli_service
-        self.validate_project_name()
+
+        if self._specified_directory:
+            _cwd_path = Path(self._get_working_cwd(working_directory))
+            self._working_project_name = _cwd_path.name
+            self._working_directory = str(_cwd_path.parent)
+        else:
+            self._working_directory = working_directory
+            self._working_project_name = working_project_name
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
         return {}
@@ -61,6 +63,8 @@ class FileTemplateScaffold:
             fw.writelines(refined_content)
 
     def scaffold(self) -> None:
+        self.validate_project_name()
+        self._ctx = self.get_templating_context()
         self.on_scaffold_started()
         for file in self._schema.files:
             self.create_directory(
@@ -92,9 +96,9 @@ class FileTemplateScaffold:
         if file.is_directory:
             new_scaffold_dir = os.path.join(working_directory, name)
             os.makedirs(new_scaffold_dir, exist_ok=True)
-            for file in file.files or []:
+            for _file in file.files:
                 self.create_directory(
-                    file=file,
+                    file=_file,
                     working_directory=new_scaffold_dir,
                     scaffold_ellar_template_path=scaffold_template_path,
                 )
@@ -108,3 +112,22 @@ class FileTemplateScaffold:
     def validate_project_name(self) -> None:
         # Check it's a valid directory name.
         pass
+
+    def _get_working_cwd(self, working_directory: str) -> str:
+        if self._specified_directory:
+            return self._handle_directory_change(working_directory)
+        return working_directory
+
+    def _handle_directory_change(self, working_directory: str) -> str:
+        if self._specified_directory == ".":
+            return working_directory
+
+        _specified_directory = (
+            self._specified_directory.lower()  # type:ignore[union-attr]
+        )
+        return os.path.join(working_directory, _specified_directory)
+
+    def get_templating_context(self) -> ProjectScaffoldContext:
+        return ProjectScaffoldContext(
+            Environment(), **self.get_scaffolding_context(self._working_project_name)
+        )

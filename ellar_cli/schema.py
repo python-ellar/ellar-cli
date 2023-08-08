@@ -9,14 +9,13 @@ class EllarPyProjectSerializer(Serializer):
     application: str = Field(alias="application")
     config: str = Field(alias="config")
     root_module: str = Field(alias="root-module")
-    apps_module: str = Field(alias="apps-module")
 
 
 class EllarScaffoldList(Serializer):
     name: str
     is_directory: bool = False
     name_in_context: t.Optional[bool] = Field(default=None, alias="name-context")
-    files: t.Optional[t.List["EllarScaffoldList"]]
+    files: t.List["EllarScaffoldList"] = Field(default=[])
 
 
 EllarScaffoldList.update_forward_refs()
@@ -31,14 +30,10 @@ class EllarScaffoldSchema(Serializer):
         return cls(
             context=["project_name"],
             files=[
-                dict(name="sample.ellar", is_directory=False),
-                dict(
-                    name="sample",
-                    files=[
-                        dict(
-                            dict(name="sample.ellar", is_directory=False),
-                        )
-                    ],
-                ),
+                {"name": "sample.ellar", "is_directory": False},
+                {
+                    "name": "sample",
+                    "files": [{"name": "sample.ellar", "is_directory": False}],
+                },
             ],
         )

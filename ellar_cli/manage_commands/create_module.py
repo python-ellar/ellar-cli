@@ -2,16 +2,16 @@ import os
 import sys
 import typing as t
 from importlib import import_module
+from pathlib import Path
 
 import typer
 from ellar.common.helper.module_loading import module_dir
 
 from ellar_cli import scaffolding
-from ellar_cli.constants import ELLAR_META
 from ellar_cli.schema import EllarScaffoldSchema
 
 from ..file_scaffolding import FileTemplateScaffold
-from ..service import EllarCLIException, EllarCLIService
+from ..service import EllarCLIException
 
 __all__ = ["create_module"]
 
@@ -21,6 +21,19 @@ module_template_json = os.path.join(root_scaffold_template_path, "setup.json")
 
 
 class ModuleTemplateScaffold(FileTemplateScaffold):
+    def __init__(
+        self, working_project_name: str, working_directory: str, **kwargs: t.Any
+    ) -> None:
+        super().__init__(
+            working_project_name=working_project_name,
+            working_directory=working_directory,
+            **kwargs,
+        )
+        if self._specified_directory:
+            _cwd_path = Path(self._get_working_cwd(working_directory))
+            self._working_project_name = working_project_name
+            self._working_directory = str(_cwd_path)
+
     def on_scaffold_completed(self) -> None:
         print(f"{self._working_project_name} module completely scaffolded")
 
@@ -55,28 +68,26 @@ class ModuleTemplateScaffold(FileTemplateScaffold):
                 sys.path.remove(self._working_directory)
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
-        template_context = dict(module_name=working_project_name)
+        template_context = {"module_name": working_project_name}
         return template_context
 
 
-def create_module(ctx: typer.Context, module_name: str):
+def create_module(
+    module_name: str,
+    directory: t.Optional[str] = typer.Argument(
+        None,
+        help="The name of a new directory to scaffold the module into.",
+        show_default=False,
+    ),
+):
     """- Scaffolds Ellar Application Module -"""
-
-    ellar_project_meta = t.cast(t.Optional[EllarCLIService], ctx.meta.get(ELLAR_META))
-    if not ellar_project_meta:
-        raise EllarCLIException("No pyproject.toml file found.")
-
-    if not ellar_project_meta.has_meta:
-        raise EllarCLIException(
-            "No available project found. please create ellar project with `ellar create-project 'project-name'`"
-        )
 
     schema = EllarScaffoldSchema.parse_file(module_template_json)
     project_template_scaffold = ModuleTemplateScaffold(
         schema=schema,
-        working_directory=ellar_project_meta.get_apps_module_path(),
+        working_directory=os.getcwd(),
         scaffold_ellar_template_root_path=root_scaffold_template_path,
-        ellar_cli_service=ellar_project_meta,
+        specified_directory=directory,
         working_project_name=module_name.lower(),
     )
     project_template_scaffold.scaffold()

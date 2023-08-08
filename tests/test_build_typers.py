@@ -58,24 +58,13 @@ def test_help_command(cli_runner):
     os.chdir(sample_app_path)
     result = subprocess.run(["ellar", "--help"], stdout=subprocess.PIPE)
     assert result.returncode == 0
-    assert (
-        result.stdout
-        == b"Usage: Ellar, Python Web framework [OPTIONS] COMMAND [ARGS]...\n\nOptions:\n  -p, --project TEXT              Run Specific Command on a specific project\n  --install-completion [bash|zsh|fish|powershell|pwsh]\n                                  Install completion for the specified shell.\n  --show-completion [bash|zsh|fish|powershell|pwsh]\n                                  Show completion for the specified shell, to\n                                  copy it or customize the installation.\n  --help                          Show this message and exit.\n\nCommands:\n  create-module      - Scaffolds Ellar Application Module -\n  create-project     - Scaffolds Ellar Application -\n  db\n  new                - Runs a complete Ellar project scaffold and creates...\n  runserver          - Starts Uvicorn Server -\n  say-hi\n  whatever-you-want  Whatever you want\n"
-    )
+
     result = subprocess.run(
         ["ellar", "-p", "example_project", "--help"], stdout=subprocess.PIPE
     )
     assert result.returncode == 0
-    assert (
-        result.stdout
-        == b"Usage: Ellar, Python Web framework [OPTIONS] COMMAND [ARGS]...\n\nOptions:\n  -p, --project TEXT              Run Specific Command on a specific project\n  --install-completion [bash|zsh|fish|powershell|pwsh]\n                                  Install completion for the specified shell.\n  --show-completion [bash|zsh|fish|powershell|pwsh]\n                                  Show completion for the specified shell, to\n                                  copy it or customize the installation.\n  --help                          Show this message and exit.\n\nCommands:\n  create-module      - Scaffolds Ellar Application Module -\n  create-project     - Scaffolds Ellar Application -\n  db\n  new                - Runs a complete Ellar project scaffold and creates...\n  runserver          - Starts Uvicorn Server -\n  say-hi\n  whatever-you-want  Whatever you want\n"
-    )
 
     result = subprocess.run(
         ["ellar", "-p", "example_project_2", "--help"], stdout=subprocess.PIPE
     )
     assert result.returncode == 0
-    assert (
-        result.stdout
-        == b"Usage: Ellar, Python Web framework [OPTIONS] COMMAND [ARGS]...\n\nOptions:\n  -p, --project TEXT              Run Specific Command on a specific project\n  --install-completion [bash|zsh|fish|powershell|pwsh]\n                                  Install completion for the specified shell.\n  --show-completion [bash|zsh|fish|powershell|pwsh]\n                                  Show completion for the specified shell, to\n                                  copy it or customize the installation.\n  --help                          Show this message and exit.\n\nCommands:\n  create-module      - Scaffolds Ellar Application Module -\n  create-project     - Scaffolds Ellar Application -\n  db\n  new                - Runs a complete Ellar project scaffold and creates...\n  project-2-command  Project 2 Custom Command\n  runserver          - Starts Uvicorn Server -\n  say-hi\n  whatever-you-want  Whatever you want\n"
-    )

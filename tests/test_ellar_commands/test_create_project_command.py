@@ -75,7 +75,6 @@ def test_create_project_command_works(tmpdir, process_runner, write_empty_py_pro
         "application": "ellar_project.server:application",
         "config": "ellar_project.config:DevelopmentConfig",
         "root_module": "ellar_project.root_module:ApplicationModule",
-        "apps_module": "ellar_project.apps",
     }
 
     application = ellar_cli_service.import_application()
