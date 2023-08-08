@@ -22,10 +22,15 @@ project_template_json = os.path.join(root_scaffold_template_path, "setup.json")
 
 
 class ProjectTemplateScaffold(FileTemplateScaffold):
+    def __init__(self, ellar_cli_service: EllarCLIService, **kwargs: t.Any) -> None:
+        super().__init__(**kwargs)
+        self.ellar_cli_service = ellar_cli_service
+
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
-        template_context = dict(
-            project_name=working_project_name, secret_key=f"ellar_{uuid.uuid4()}"
-        )
+        template_context = {
+            "project_name": working_project_name,
+            "secret_key": f"ellar_{uuid.uuid4()}",
+        }
         return template_context
 
     def validate_project_name(self) -> None:
