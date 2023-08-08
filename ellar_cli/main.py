@@ -61,7 +61,7 @@ def build_typers() -> t.Any:
 
     if meta_ and meta_.has_meta:
         module_configs = AppFactory.get_all_modules(
-            ModuleSetup(meta_.import_root_module())  # type:ignore
+            ModuleSetup(meta_.import_root_module())
         )
         reflector = Reflector()
 
