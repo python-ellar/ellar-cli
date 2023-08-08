@@ -41,7 +41,6 @@ def test_import_project_meta_returns_default_project_when_project_is_none(
         "application": "some-project.server:application",
         "config": "some-project.config:DevelopmentConfig",
         "root_module": "some-project.root_module:ApplicationModule",
-        "apps_module": "some-project.apps",
     }
     assert ellar_cli_service.app == "some-project"
     assert ellar_cli_service.ellar_py_projects.default_project == "some-project"
@@ -60,7 +59,6 @@ def test_import_project_meta_returns_meta_for_a_project(
         "application": "some-other-project.server:application",
         "config": "some-other-project.config:DevelopmentConfig",
         "root_module": "some-other-project.root_module:ApplicationModule",
-        "apps_module": "some-other-project.apps",
     }
     assert ellar_cli_service.app == "some-other-project"
     assert ellar_cli_service.ellar_py_projects.default_project == "some-project"
@@ -108,7 +106,6 @@ def test_create_ellar_project_meta_work(
         "application": "new-project.server:application",
         "config": "new-project.config:DevelopmentConfig",
         "root_module": "new-project.root_module:ApplicationModule",
-        "apps_module": "new-project.apps",
     }
 
 
@@ -149,7 +146,6 @@ def test_import_application_works(tmp_path, write_empty_py_project, process_runn
         "application": "new_project_one.server:application",
         "config": "new_project_one.config:DevelopmentConfig",
         "root_module": "new_project_one.root_module:ApplicationModule",
-        "apps_module": "new_project_one.apps",
     }
 
     application = ellar_cli_service.import_application()
@@ -174,23 +170,3 @@ def test_import_root_module_works(write_empty_py_project, process_runner):
     root_module = ellar_cli_service.import_root_module()
 
     assert issubclass(root_module, ModuleBase)
-
-
-def test_import_apps_module_works(write_empty_py_project, process_runner):
-    result = process_runner(["ellar", "create-project", "new_project_four"])
-    assert result.returncode == 0
-
-    ellar_cli_service = EllarCLIService.import_project_meta()
-    apps_module = ellar_cli_service.import_apps_module()
-
-    assert apps_module
-
-
-def test_get_apps_module_path_works(tmp_path, write_empty_py_project, process_runner):
-    result = process_runner(["ellar", "create-project", "new_project_five"])
-    assert result.returncode == 0
-
-    ellar_cli_service = EllarCLIService.import_project_meta()
-    apps_module_path = ellar_cli_service.get_apps_module_path()
-
-    assert str(tmp_path) in apps_module_path

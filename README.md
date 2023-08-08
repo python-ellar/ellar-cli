@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="#" target="blank"><img src="docs/img/EllarLogoIconOnly.png" width="200" alt="Ellar Logo" /></a>
+  <a href="#" target="blank"><img src="https://eadwincode.github.io/ellar/img/EllarLogoB.png" width="200" alt="Ellar Logo" /></a>
 </p>
 
 <p align="center"> Ellar CLI Tool for Scaffolding Ellar Projects and Modules and also running Ellar Commands</p>

@@ -3,10 +3,11 @@ import typing as t
 
 from click import ClickException
 from ellar.common.constants import ELLAR_CONFIG_MODULE
-from ellar.common.helper.importer import import_from_string, module_import
-from ellar.common.helper.module_loading import module_dir
+from ellar.common.helper.importer import import_from_string
 from ellar.core import App, Config, ModuleBase
-from tomlkit import dumps as tomlkit_dumps, parse as tomlkit_parse, table
+from tomlkit import dumps as tomlkit_dumps
+from tomlkit import parse as tomlkit_parse
+from tomlkit import table
 from tomlkit.items import Table
 
 from ellar_cli.constants import ELLAR_PY_PROJECT
@@ -22,7 +23,7 @@ class EllarCLIException(ClickException):
 
 
 class EllarPyProject:
-    def __init__(self, ellar: Table = None) -> None:
+    def __init__(self, ellar: t.Optional[Table] = None) -> None:
         self._ellar = ellar if ellar is not None else table()
         self._projects = t.cast(
             Table, self._ellar.setdefault(ELLAR_PROJECTS_KEY, table())
@@ -41,8 +42,8 @@ class EllarPyProject:
         return self._ellar.get(ELLAR_DEFAULT_KEY, None) is not None
 
     @property
-    def default_project(self) -> str:
-        return self._ellar.get(ELLAR_DEFAULT_KEY, None)
+    def default_project(self) -> t.Optional[str]:
+        return self._ellar.get(ELLAR_DEFAULT_KEY) or None
 
     @default_project.setter
     def default_project(self, value: str) -> None:
@@ -77,7 +78,7 @@ class EllarCLIService:
         py_project_path: str,
         cwd: str,
         app_name: str = "ellar",
-        ellar_py_projects: EllarPyProject = None,
+        ellar_py_projects: t.Optional[EllarPyProject] = None,
     ) -> None:
         self._meta = meta
         self.py_project_path = py_project_path
@@ -109,7 +110,6 @@ class EllarCLIService:
 
         py_project_file_path = os.path.join(cwd, PY_PROJECT_TOML)
         if os.path.exists(py_project_file_path):
-
             pyproject_table = EllarCLIService.read_py_project(py_project_file_path)
             _ellar_pyproject_serializer: t.Optional[EllarPyProjectSerializer] = None
 
@@ -163,7 +163,6 @@ class EllarCLIService:
         ellar_new_project.add(
             "root-module", f"{project_name}.root_module:ApplicationModule"
         )
-        ellar_new_project.add("apps-module", f"{project_name}.apps")
 
         # TODO: lock pyproject.toml file
         EllarCLIService.write_py_project(self.py_project_path, pyproject_table)
@@ -173,7 +172,7 @@ class EllarCLIService:
         if os.path.exists(path):
             with open(path, mode="r") as fp:
                 table_content = tomlkit_parse(fp.read())
-                return table_content
+                return table_content  # type:ignore[return-value]
         return None
 
     @staticmethod
@@ -202,12 +201,3 @@ class EllarCLIService:
             t.Type["ModuleBase"], import_from_string(self._meta.root_module)
         )
         return root_module
-
-    def import_apps_module(self) -> t.Any:
-        assert self._meta
-        apps_module = module_import(self._meta.apps_module)
-        return apps_module
-
-    def get_apps_module_path(self) -> str:
-        apps_module = self.import_apps_module()
-        return module_dir(apps_module)  # type: ignore

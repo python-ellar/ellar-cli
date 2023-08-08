@@ -6,15 +6,6 @@
       "is_directory": "true",
       "files": [
         {
-          "name": "apps",
-          "is_directory": "true",
-          "files": [
-            {
-              "name": "__init__.ellar"
-            }
-          ]
-        },
-        {
           "name": "core",
           "is_directory": "true",
           "files": [
