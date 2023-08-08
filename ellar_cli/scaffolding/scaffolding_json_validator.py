@@ -39,9 +39,9 @@ class ScaffoldingJSONValidator:
                     f"Scaffolding Folder: {file.name} @{scaffold_ellar_template_path} is not a Directory"
                 )
 
-            for file in file.files or []:
+            for _file in file.files:
                 self._check_directory_file_exist(
-                    file=file,
+                    file=_file,
                     scaffold_ellar_template_path=scaffold_template_path,
                 )
         else:

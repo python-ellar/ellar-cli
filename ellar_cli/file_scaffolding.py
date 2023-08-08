@@ -25,7 +25,7 @@ class FileTemplateScaffold:
         working_project_name: str,
         working_directory: str,
         scaffold_ellar_template_root_path: str,
-        specified_directory: str = None,
+        specified_directory: t.Optional[str] = None,
     ) -> None:
         self._specified_directory = specified_directory
         self._schema = schema
@@ -96,9 +96,9 @@ class FileTemplateScaffold:
         if file.is_directory:
             new_scaffold_dir = os.path.join(working_directory, name)
             os.makedirs(new_scaffold_dir, exist_ok=True)
-            for file in file.files or []:
+            for _file in file.files:
                 self.create_directory(
-                    file=file,
+                    file=_file,
                     working_directory=new_scaffold_dir,
                     scaffold_ellar_template_path=scaffold_template_path,
                 )

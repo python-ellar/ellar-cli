@@ -68,7 +68,7 @@ class ModuleTemplateScaffold(FileTemplateScaffold):
                 sys.path.remove(self._working_directory)
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
-        template_context = dict(module_name=working_project_name)
+        template_context = {"module_name": working_project_name}
         return template_context
 
 

@@ -27,9 +27,10 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
         self.ellar_cli_service = ellar_cli_service
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
-        template_context = dict(
-            project_name=working_project_name, secret_key=f"ellar_{uuid.uuid4()}"
-        )
+        template_context = {
+            "project_name": working_project_name,
+            "secret_key": f"ellar_{uuid.uuid4()}",
+        }
         return template_context
 
     def validate_project_name(self) -> None:

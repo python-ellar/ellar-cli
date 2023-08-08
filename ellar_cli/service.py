@@ -5,7 +5,9 @@ from click import ClickException
 from ellar.common.constants import ELLAR_CONFIG_MODULE
 from ellar.common.helper.importer import import_from_string
 from ellar.core import App, Config, ModuleBase
-from tomlkit import dumps as tomlkit_dumps, parse as tomlkit_parse, table
+from tomlkit import dumps as tomlkit_dumps
+from tomlkit import parse as tomlkit_parse
+from tomlkit import table
 from tomlkit.items import Table
 
 from ellar_cli.constants import ELLAR_PY_PROJECT
@@ -21,7 +23,7 @@ class EllarCLIException(ClickException):
 
 
 class EllarPyProject:
-    def __init__(self, ellar: Table = None) -> None:
+    def __init__(self, ellar: t.Optional[Table] = None) -> None:
         self._ellar = ellar if ellar is not None else table()
         self._projects = t.cast(
             Table, self._ellar.setdefault(ELLAR_PROJECTS_KEY, table())
@@ -76,7 +78,7 @@ class EllarCLIService:
         py_project_path: str,
         cwd: str,
         app_name: str = "ellar",
-        ellar_py_projects: EllarPyProject = None,
+        ellar_py_projects: t.Optional[EllarPyProject] = None,
     ) -> None:
         self._meta = meta
         self.py_project_path = py_project_path
@@ -171,7 +173,7 @@ class EllarCLIService:
         if os.path.exists(path):
             with open(path, mode="r") as fp:
                 table_content = tomlkit_parse(fp.read())
-                return table_content
+                return table_content  # type:ignore[return-value]
         return None
 
     @staticmethod
