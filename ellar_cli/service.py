@@ -110,7 +110,6 @@ class EllarCLIService:
 
         py_project_file_path = os.path.join(cwd, PY_PROJECT_TOML)
         if os.path.exists(py_project_file_path):
-
             pyproject_table = EllarCLIService.read_py_project(py_project_file_path)
             _ellar_pyproject_serializer: t.Optional[EllarPyProjectSerializer] = None
 

@@ -93,7 +93,6 @@ def test_create_module_fails_for_existing_directory_name(
 
 
 def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
-
     result = process_runner(
         [
             "ellar",
