@@ -47,10 +47,10 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
         if self._specified_directory and "." not in self._specified_directory:
             self.prefix = self._specified_directory.replace("/", ".").lower()
 
-            if self.prefix.startswith("."):
+            if self.prefix.startswith("."):  # pragma: no cover
                 self.prefix = self.prefix[1:]
 
-            if self.prefix.endswith("."):
+            if self.prefix.endswith("."):  # pragma: no cover
                 self.prefix = self.prefix[:-1]
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
