@@ -85,12 +85,6 @@ class NewTemplateScaffold(FileTemplateScaffold):
         return True
 
     def validate_project_name(self) -> None:
-        if os.path.exists(self._working_project_name):
-            message = "A folder with same name exist '{name}' ".format(
-                name=self._working_project_name
-            )
-            raise EllarCLIException(message)
-
         if not self.is_directory_empty():
             working_project_dir = os.path.join(
                 self._working_directory, self._working_project_name

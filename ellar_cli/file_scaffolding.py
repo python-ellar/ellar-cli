@@ -28,8 +28,6 @@ class FileTemplateScaffold:
         specified_directory: t.Optional[str] = None,
     ) -> None:
         self._specified_directory = specified_directory
-        if specified_directory and specified_directory.startswith("/"):
-            self._specified_directory = specified_directory[1:]
 
         self._schema = schema
         self._ctx = ProjectScaffoldContext(Environment())
