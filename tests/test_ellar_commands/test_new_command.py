@@ -54,7 +54,8 @@ def test_new_command_works_with_specific_directory_case_3(tmpdir, process_runner
         "ellar --project ellar_project_new runserver --reload"
         in result.stdout.decode("utf8")
     )
-    os.chdir(os.path.join(_path))
+    os.chdir(_path)
+    print(os.listdir(_path))
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict() == {
         "project_name": "ellar_project_new",
