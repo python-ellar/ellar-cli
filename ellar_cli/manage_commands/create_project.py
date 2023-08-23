@@ -1,7 +1,8 @@
 import os
+import secrets
 import typing as t
-import uuid
 from importlib import import_module
+from pathlib import Path
 
 import typer
 from ellar.common.helper.module_loading import module_dir
@@ -22,14 +23,42 @@ project_template_json = os.path.join(root_scaffold_template_path, "setup.json")
 
 
 class ProjectTemplateScaffold(FileTemplateScaffold):
-    def __init__(self, ellar_cli_service: EllarCLIService, **kwargs: t.Any) -> None:
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        ellar_cli_service: EllarCLIService,
+        working_project_name: str,
+        working_directory: str,
+        **kwargs: t.Any,
+    ) -> None:
+        super().__init__(
+            **kwargs,
+            working_project_name=working_project_name,
+            working_directory=working_directory,
+        )
         self.ellar_cli_service = ellar_cli_service
+        self._working_project_name = working_project_name
+        if self._specified_directory:
+            _cwd_path = Path(self._get_working_cwd(working_directory))
+            self._working_directory = str(_cwd_path)
+        else:
+            self._working_directory = working_directory
+
+        self.prefix: t.Optional[str] = None
+        if self._specified_directory and "." not in self._specified_directory:
+            self.prefix = self._specified_directory.replace("/", ".").lower()
+
+            if self.prefix.startswith("."):
+                self.prefix = self.prefix[1:]
+
+            if self.prefix.endswith("."):
+                self.prefix = self.prefix[:-1]
 
     def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
+        _prefix = f"{self.prefix}." if self.prefix else ""
         template_context = {
             "project_name": working_project_name,
-            "secret_key": f"ellar_{uuid.uuid4()}",
+            "secret_key": f"ellar_{secrets.token_hex(32)}",
+            "config_prefix": _prefix,
         }
         return template_context
 
@@ -60,8 +89,10 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
             raise EllarCLIException(message)
 
     def on_scaffold_completed(self) -> None:
+        _working_project_name = self._working_project_name
+
         self.ellar_cli_service.create_ellar_project_meta(
-            project_name=self._working_project_name
+            project_name=_working_project_name, prefix=self.prefix
         )
         print(
             f"`{self._working_project_name}` project scaffold completed. To start your server, run the command below"
@@ -70,7 +101,15 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
         print("Happy coding!")
 
 
-def create_project(ctx: typer.Context, project_name: str):
+def create_project(
+    ctx: typer.Context,
+    project_name: str,
+    directory: t.Optional[str] = typer.Argument(
+        None,
+        help="The name of a new directory to scaffold the project into.",
+        show_default=False,
+    ),
+):
     """- Scaffolds Ellar Application -"""
 
     ellar_project_meta = t.cast(t.Optional[EllarCLIService], ctx.meta.get(ELLAR_META))
@@ -86,6 +125,7 @@ def create_project(ctx: typer.Context, project_name: str):
         working_directory=os.getcwd(),
         scaffold_ellar_template_root_path=root_scaffold_template_path,
         ellar_cli_service=ellar_project_meta,
+        specified_directory=directory,
         working_project_name=project_name.lower(),
     )
     project_template_scaffold.scaffold()

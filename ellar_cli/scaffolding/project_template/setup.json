@@ -1,5 +1,5 @@
 {
-  "context": ["project_name", "secret_key"],
+  "context": ["project_name", "secret_key", "config_prefix"],
   "files": [
     {
       "name": "project_name",

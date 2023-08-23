@@ -28,6 +28,9 @@ class FileTemplateScaffold:
         specified_directory: t.Optional[str] = None,
     ) -> None:
         self._specified_directory = specified_directory
+        if specified_directory and specified_directory.startswith("/"):
+            self._specified_directory = specified_directory[1:]
+
         self._schema = schema
         self._ctx = ProjectScaffoldContext(Environment())
         self._scaffold_ellar_template_root_path = scaffold_ellar_template_root_path
@@ -79,7 +82,9 @@ class FileTemplateScaffold:
 
     def on_scaffold_started(self) -> None:
         for context in self._schema.context:
-            assert self._ctx[context], f"{context} template context is missing."
+            assert (
+                self._ctx.get(context) is not None
+            ), f"{context} template context is missing."
 
     def create_directory(
         self,
@@ -125,7 +130,7 @@ class FileTemplateScaffold:
         _specified_directory = (
             self._specified_directory.lower()  # type:ignore[union-attr]
         )
-        return os.path.join(working_directory, _specified_directory)
+        return os.path.join(str(working_directory), _specified_directory)
 
     def get_templating_context(self) -> ProjectScaffoldContext:
         return ProjectScaffoldContext(
