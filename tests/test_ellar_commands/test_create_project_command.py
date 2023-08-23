@@ -1,6 +1,6 @@
 import os
 
-from ellar.core import App
+from ellar.core import App, Config
 
 from ellar_cli.service import EllarCLIService
 
@@ -79,3 +79,27 @@ def test_create_project_command_works(tmpdir, process_runner, write_empty_py_pro
 
     application = ellar_cli_service.import_application()
     assert isinstance(application, App)
+
+
+def test_create_project_command_works_with_specific_directory(
+    tmpdir, process_runner, write_empty_py_project
+):
+    result = process_runner(["ellar", "create-project", "ellar_project", "Another/me"])
+    assert result.returncode == 0
+    assert result.stdout.decode("utf8") == (
+        "`ellar_project` project scaffold completed. To start your server, run the command below\n"
+        "ellar --project ellar_project runserver --reload\n"
+        "Happy coding!\n"
+    )
+    ellar_cli_service = EllarCLIService.import_project_meta()
+    assert ellar_cli_service._meta.dict() == {
+        "project_name": "ellar_project",
+        "application": "another.me.ellar_project.server:application",
+        "config": "another.me.ellar_project.config:DevelopmentConfig",
+        "root_module": "another.me.ellar_project.root_module:ApplicationModule",
+    }
+    application = ellar_cli_service.import_application()
+    assert isinstance(application, App)
+    config = ellar_cli_service.get_application_config()
+    assert isinstance(config, Config)
+    assert ellar_cli_service.import_root_module()

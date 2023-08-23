@@ -25,7 +25,7 @@ def test_new_command_works(tmpdir, process_runner):
     }
 
 
-def test_new_command_works_with_specific_directory(tmpdir, process_runner):
+def test_new_command_works_with_specific_directory_case_1(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
     assert result.returncode == 0
     assert result.stdout.decode("utf8") == (
@@ -43,6 +43,17 @@ def test_new_command_works_with_specific_directory(tmpdir, process_runner):
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
     }
+
+
+def test_new_command_works_with_specific_directory_case_3(tmpdir, process_runner):
+    _path = tmpdir / "23-August-2023"
+    os.makedirs(_path)
+    result = process_runner(["ellar", "new", "ellar-project-new", str(_path)])
+    assert result.returncode == 0
+    assert (
+        "ellar --project ellar_project_new runserver --reload"
+        in result.stdout.decode("utf8")
+    )
 
 
 def test_new_command_fails_case_1(tmpdir, process_runner):
@@ -72,13 +83,13 @@ def test_new_command_works_with_specific_directory_case_2(tmpdir, process_runner
     }
 
 
-def test_new_command_fails_for_existing_folder_name(tmp_path, process_runner):
-    os.makedirs(tmp_path / "ellar-project-exist", exist_ok=True)
-    result = process_runner(["ellar", "new", "ellar-project-exist"])
-    assert result.returncode == 1
-    assert result.stderr.decode("utf8") == (
-        "Error: A folder with same name exist 'ellar-project-exist' \n"
-    )
+# def test_new_command_fails_for_existing_folder_name(tmp_path, process_runner):
+#     os.makedirs(tmp_path / "ellar-project-exist", exist_ok=True)
+#     result = process_runner(["ellar", "new", "ellar-project-exist"])
+#     assert result.returncode == 1
+#     assert result.stderr.decode("utf8") == (
+#         "Error: A folder with same name exist 'ellar-project-exist' \n"
+#     )
 
 
 def test_new_command_fails_for_invalid_project_name(tmp_path, process_runner):

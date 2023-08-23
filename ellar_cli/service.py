@@ -139,7 +139,9 @@ class EllarCLIService:
             )
         return None
 
-    def create_ellar_project_meta(self, project_name: str) -> None:
+    def create_ellar_project_meta(
+        self, project_name: str, prefix: t.Optional[str] = None
+    ) -> None:
         pyproject_table = EllarCLIService.read_py_project(self.py_project_path)
         if pyproject_table is None:
             raise EllarCLIException("Could not locate `pyproject.toml`")
@@ -156,12 +158,18 @@ class EllarCLIService:
         if not ellar_py_project.has_default_project:
             ellar_py_project.default_project = project_name.lower()
 
+        _prefix = f"{prefix}." if prefix else ""
+
         ellar_new_project = ellar_py_project.get_or_create_project(project_name.lower())
         ellar_new_project.add("project-name", project_name.lower())
-        ellar_new_project.add("application", f"{project_name}.server:application")
-        ellar_new_project.add("config", f"{project_name}.config:DevelopmentConfig")
         ellar_new_project.add(
-            "root-module", f"{project_name}.root_module:ApplicationModule"
+            "application", f"{_prefix}{project_name}.server:application"
+        )
+        ellar_new_project.add(
+            "config", f"{_prefix}{project_name}.config:DevelopmentConfig"
+        )
+        ellar_new_project.add(
+            "root-module", f"{_prefix}{project_name}.root_module:ApplicationModule"
         )
 
         # TODO: lock pyproject.toml file
