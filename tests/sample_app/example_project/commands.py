@@ -1,3 +1,4 @@
+import click
 from ellar.common import EllarTyper, command
 
 db = EllarTyper(name="db")
@@ -13,3 +14,8 @@ def create_migration():
 def whatever_you_want():
     """Whatever you want"""
     print("Whatever you want command")
+
+
+@click.command()
+def say_hello():
+    click.echo("Hello from ellar.")

@@ -40,11 +40,11 @@ def test_build_typers_command_for_specific_project_works():
     os.chdir(sample_app_path)
 
     result = subprocess.run(
-        ["ellar", "-p", "example_project_2", "whatever-you-want"],
+        ["ellar", "-p", "example_project", "whatever-you-want"],
         stdout=subprocess.PIPE,
     )
     assert result.returncode == 0
-    assert result.stdout == b"Whatever you want command from example_project_2\n"
+    assert result.stdout == b"Whatever you want command\n"
 
     result = subprocess.run(
         ["ellar", "-p", "example_project_2", "whatever-you-want"],
@@ -68,3 +68,11 @@ def test_help_command(cli_runner):
         ["ellar", "-p", "example_project_2", "--help"], stdout=subprocess.PIPE
     )
     assert result.returncode == 0
+
+
+def test_click_command_works(cli_runner):
+    os.chdir(sample_app_path)
+    result = subprocess.run(["ellar", "say-hello"], stdout=subprocess.PIPE)
+    assert result.returncode == 0
+
+    assert result.stdout == b"Hello from ellar.\n"
