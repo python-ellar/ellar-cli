@@ -2,23 +2,25 @@ import getopt
 import sys
 import typing as t
 
+import click
 import typer
 from ellar.common.commands import EllarTyper
 from ellar.common.constants import CALLABLE_COMMAND_INFO, MODULE_METADATA
 from ellar.core.factory import AppFactory
 from ellar.core.modules import ModuleSetup
 from ellar.core.services import Reflector
-from typer import Typer
 from typer.models import CommandInfo
 
 from ellar_cli.constants import ELLAR_META
 
 from .manage_commands import create_module, create_project, new_command, runserver
 from .service import EllarCLIService
+from .typer import EllarCLITyper
 
 __all__ = ["build_typers", "_typer", "typer_callback"]
 
-_typer = Typer(name="ellar")
+
+_typer = EllarCLITyper(name="ellar")
 _typer.command(name="new")(new_command)
 _typer.command()(runserver)
 _typer.command(name="create-project")(create_project)
@@ -41,21 +43,20 @@ def typer_callback(
     ctx.meta[ELLAR_META] = meta_
 
 
-def build_typers() -> t.Any:
+def build_typers() -> t.Any:  # pragma: no cover
+    app_name: t.Optional[str] = None
     try:
+        argv = list(sys.argv)
         options, args = getopt.getopt(
-            sys.argv[1:],
-            "p:",
+            argv[1:],
+            "hp:",
             ["project=", "help"],
         )
-        app_name: t.Optional[str] = None
-
         for k, v in options:
             if k in ["-p", "--project"] and v:
                 app_name = v
-    except Exception:
-        typer.Abort()
-        return 1
+    except Exception as ex:
+        click.echo(ex)
 
     meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(app_name)
 
@@ -77,3 +78,5 @@ def build_typers() -> t.Any:
                         CALLABLE_COMMAND_INFO
                     ]
                     _typer.registered_commands.append(command_info)
+                elif isinstance(typer_command, click.Command):
+                    _typer.add_click_command(typer_command)

@@ -57,7 +57,7 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
         _prefix = f"{self.prefix}." if self.prefix else ""
         template_context = {
             "project_name": working_project_name,
-            "secret_key": f"ellar_{secrets.token_hex(32)}",
+            "secret_key": f"ellar_{secrets.token_urlsafe(32)}",
             "config_prefix": _prefix,
         }
         return template_context
