@@ -42,21 +42,19 @@ def version_callback(value: bool) -> None:
 @_typer.callback()
 def typer_callback(
     ctx: typer.Context,
-    project: t.Optional[str] = typer.Option(
-        None,
-        "-p",
+    project: str = typer.Option(
+        "default",
         "--project",
         show_default=True,
         exists=True,
         help="Run Specific Command on a specific project",
     ),
     version: t.Optional[bool] = typer.Option(
-        ...,
-        "-v",
+        False,
         "--version",
         callback=version_callback,
-        is_flag=True,
         help="CLI Version",
+        show_default=False,
     ),
 ) -> None:
     meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(project)
@@ -69,11 +67,11 @@ def build_typers() -> t.Any:  # pragma: no cover
         argv = list(sys.argv)
         options, args = getopt.getopt(
             argv[1:],
-            "hpv:",
+            "",
             ["project=", "help", "version"],
         )
         for k, v in options:
-            if k in ["-p", "--project"] and v:
+            if k in ["--project"] and v:
                 app_name = v
     except Exception as ex:
         click.echo(ex)
