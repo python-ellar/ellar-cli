@@ -22,7 +22,7 @@ def test_build_typers_command_works_for_default_project(cli_runner):
 def test_build_typers_ellar_typer_for_specific_project_works():
     os.chdir(sample_app_path)
     result = subprocess.run(
-        ["ellar", "-p", "example_project_2", "db", "create-migration"],
+        ["ellar", "--project", "example_project_2", "db", "create-migration"],
         stdout=subprocess.PIPE,
     )
     assert result.returncode == 0
@@ -40,14 +40,14 @@ def test_build_typers_command_for_specific_project_works():
     os.chdir(sample_app_path)
 
     result = subprocess.run(
-        ["ellar", "-p", "example_project", "whatever-you-want"],
+        ["ellar", "--project", "example_project", "whatever-you-want"],
         stdout=subprocess.PIPE,
     )
     assert result.returncode == 0
     assert result.stdout == b"Whatever you want command\n"
 
     result = subprocess.run(
-        ["ellar", "-p", "example_project_2", "whatever-you-want"],
+        ["ellar", "--project", "example_project_2", "whatever-you-want"],
         stdout=subprocess.PIPE,
     )
     assert result.returncode == 0
@@ -60,12 +60,12 @@ def test_help_command(cli_runner):
     assert result.returncode == 0
 
     result = subprocess.run(
-        ["ellar", "-p", "example_project", "--help"], stdout=subprocess.PIPE
+        ["ellar", "--project", "example_project", "--help"], stdout=subprocess.PIPE
     )
     assert result.returncode == 0
 
     result = subprocess.run(
-        ["ellar", "-p", "example_project_2", "--help"], stdout=subprocess.PIPE
+        ["ellar", "--project", "example_project_2", "--help"], stdout=subprocess.PIPE
     )
     assert result.returncode == 0
 
