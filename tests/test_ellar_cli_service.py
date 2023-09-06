@@ -170,3 +170,13 @@ def test_import_root_module_works(write_empty_py_project, process_runner):
     root_module = ellar_cli_service.import_root_module()
 
     assert issubclass(root_module, ModuleBase)
+
+
+def test_version_works(write_empty_py_project, process_runner):
+    result = process_runner(["ellar", "--version"])
+    assert result.returncode == 0
+
+    assert (
+        result.stdout
+        == b"===========================================================\nEllar CLI Version: 0.2.2\n-----------------------------------------------------------\nEllar Version: 0.4.7\n===========================================================\n"
+    )

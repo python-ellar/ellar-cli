@@ -3,6 +3,7 @@ import sys
 import typing as t
 
 import click
+import ellar
 import typer
 from ellar.common.commands import EllarTyper
 from ellar.common.constants import CALLABLE_COMMAND_INFO, MODULE_METADATA
@@ -11,6 +12,7 @@ from ellar.core.modules import ModuleSetup
 from ellar.core.services import Reflector
 from typer.models import CommandInfo
 
+import ellar_cli
 from ellar_cli.constants import ELLAR_META
 
 from .manage_commands import create_module, create_project, new_command, runserver
@@ -27,6 +29,16 @@ _typer.command(name="create-project")(create_project)
 _typer.command(name="create-module")(create_module)
 
 
+def version_callback(value: bool) -> None:
+    if value:
+        click.echo("===========================================================")
+        click.echo(f"Ellar CLI Version: {ellar_cli.__version__}")
+        click.echo("-----------------------------------------------------------")
+        click.echo(f"Ellar Version: {ellar.__version__}")
+        click.echo("===========================================================")
+        raise typer.Exit(0)
+
+
 @_typer.callback()
 def typer_callback(
     ctx: typer.Context,
@@ -37,6 +49,14 @@ def typer_callback(
         show_default=True,
         exists=True,
         help="Run Specific Command on a specific project",
+    ),
+    version: t.Optional[bool] = typer.Option(
+        ...,
+        "-v",
+        "--version",
+        callback=version_callback,
+        is_flag=True,
+        help="CLI Version",
     ),
 ) -> None:
     meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(project)
@@ -49,8 +69,8 @@ def build_typers() -> t.Any:  # pragma: no cover
         argv = list(sys.argv)
         options, args = getopt.getopt(
             argv[1:],
-            "hp:",
-            ["project=", "help"],
+            "hpv:",
+            ["project=", "help", "version"],
         )
         for k, v in options:
             if k in ["-p", "--project"] and v:
