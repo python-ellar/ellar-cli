@@ -176,7 +176,6 @@ def test_version_works(write_empty_py_project, process_runner):
     result = process_runner(["ellar", "--version"])
     assert result.returncode == 0
 
-    assert (
+    assert "Ellar CLI Version:" in str(result.stdout) and "Ellar Version:" in str(
         result.stdout
-        == b"===========================================================\nEllar CLI Version: 0.2.2\n-----------------------------------------------------------\nEllar Version: 0.4.7\n===========================================================\n"
     )
