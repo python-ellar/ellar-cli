@@ -1,6 +1,7 @@
 import os
 
-from ellar.core import App, Config
+from ellar.app import App
+from ellar.core import Config
 
 from ellar_cli.service import EllarCLIService
 
