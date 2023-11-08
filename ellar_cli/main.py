@@ -5,9 +5,9 @@ import typing as t
 import click
 import ellar
 import typer
+from ellar.app import AppFactory
 from ellar.common.commands import EllarTyper
 from ellar.common.constants import CALLABLE_COMMAND_INFO, MODULE_METADATA
-from ellar.core.factory import AppFactory
 from ellar.core.modules import ModuleSetup
 from ellar.core.services import Reflector
 from typer.models import CommandInfo

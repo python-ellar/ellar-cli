@@ -2,9 +2,10 @@ import os
 import typing as t
 
 from click import ClickException
+from ellar.app import App
 from ellar.common.constants import ELLAR_CONFIG_MODULE
 from ellar.common.helper.importer import import_from_string
-from ellar.core import App, Config, ModuleBase
+from ellar.core import Config, ModuleBase
 from tomlkit import dumps as tomlkit_dumps
 from tomlkit import parse as tomlkit_parse
 from tomlkit import table

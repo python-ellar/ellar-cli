@@ -1,7 +1,8 @@
 import os
 
 import pytest
-from ellar.core import App, ConfigDefaultTypesMixin, ModuleBase
+from ellar.app import App
+from ellar.core import ConfigDefaultTypesMixin, ModuleBase
 
 from ellar_cli.service import (
     PY_PROJECT_TOML,
