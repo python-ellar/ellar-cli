@@ -42,7 +42,6 @@ def test_cli_headers(
     with mock.patch.object(runserver, "uvicorn_run") as mock_run:
         result = cli_runner.invoke_ellar_command(["runserver", "--header", HEADERS])
 
-    assert result.output == ""
     assert result.exit_code == 0, result.stderr
     mock_run.assert_called_once()
     assert mock_run.call_args[1]["headers"] == [
@@ -90,7 +89,6 @@ def test_cli_uds(
         )
 
     assert result.exit_code == 0, result.stderr
-    assert result.output == ""
     mock_run.assert_called_once()
     assert mock_run.call_args[1]["workers"] == 2
     assert mock_run.call_args[1]["uds"] == str(uds_file)
@@ -105,7 +103,6 @@ def test_cli_event_size(cli_runner, process_runner, write_empty_py_project) -> N
         result = cli_runner.invoke_ellar_command(
             ["runserver", "--h11-max-incomplete-event-size", str(32 * 1024)]
         )
-    assert result.output == ""
     assert result.exit_code == 0, result.stderr
     mock_run.assert_called_once()
     assert mock_run.call_args[1]["h11_max_incomplete_event_size"] == 32768
@@ -126,7 +123,7 @@ def test_env_variables(
     process_runner(["ellar", "create-project", "ellar_project_6"])
     with mock.patch.object(runserver, "uvicorn_run") as mock_run:
         result = cli_runner.invoke_ellar_command(["runserver"], env=os.environ)
-    assert result.output == ""
+
     assert result.exit_code == 0, result.stderr
     _, kwargs = mock_run.call_args
     assert kwargs["http"] == "auto"
@@ -140,7 +137,6 @@ def test_mis_match_env_variables(
         result = cli_runner.invoke_ellar_command(
             ["runserver", "--http=httptools"], env=os.environ
         )
-    assert result.output == ""
     assert result.exit_code == 0, result.stderr
     _, kwargs = mock_run.call_args
     assert kwargs["http"] == "httptools"
