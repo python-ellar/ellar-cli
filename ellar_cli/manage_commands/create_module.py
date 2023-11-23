@@ -5,7 +5,7 @@ from importlib import import_module
 from pathlib import Path
 
 import typer
-from ellar.common.helper.module_loading import module_dir
+from ellar.common.utils.module_loading import module_dir
 
 from ellar_cli import scaffolding
 from ellar_cli.schema import EllarScaffoldSchema

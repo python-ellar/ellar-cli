@@ -1,10 +1,13 @@
 import ssl
 import sys
 import typing as t
+from datetime import datetime
 from pathlib import Path
 
+import ellar
 import typer
-from ellar.common.helper.enums import create_enums_from_list
+from ellar.app import current_config
+from ellar.common.utils.enums import create_enums_from_list
 from h11._connection import DEFAULT_MAX_INCOMPLETE_EVENT_SIZE
 from uvicorn.config import (
     HTTP_PROTOCOLS,
@@ -245,12 +248,12 @@ def runserver(
             "No available project found. please create ellar project with `ellar create-project 'project-name'`"
         )
 
-    application = None if factory else ellar_project_meta.project_meta.application
+    application_import_string = (
+        None if factory else ellar_project_meta.project_meta.application
+    )
 
-    config = ellar_project_meta.get_application_config()
-
-    log_config = config.LOGGING_CONFIG
-    _log_level = config.LOG_LEVEL
+    log_config = current_config.LOGGING_CONFIG
+    _log_level = current_config.LOG_LEVEL
 
     _log_level = log_level if log_level else _log_level or LOG_LEVELS.info
 
@@ -304,4 +307,12 @@ def runserver(
             ws_per_message_deflate=ws_per_message_deflate,
         )
 
-    uvicorn_run(application, **init_kwargs)
+    now = datetime.now().strftime("%B %d, %Y - %X")
+    version = ellar.__version__
+    print(
+        f"\nStarting Uvicorn server...\n"
+        f"{now}\n"
+        f"Ellar version {version}, using settings {current_config.config_module!r}\n"
+    )
+
+    uvicorn_run(application_import_string, **init_kwargs)

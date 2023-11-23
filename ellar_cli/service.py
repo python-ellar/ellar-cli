@@ -1,10 +1,12 @@
+import functools
 import os
 import typing as t
 
 from click import ClickException
 from ellar.app import App
+from ellar.app.context import ApplicationContext
 from ellar.common.constants import ELLAR_CONFIG_MODULE
-from ellar.common.helper.importer import import_from_string
+from ellar.common.utils.importer import import_from_string
 from ellar.core import Config, ModuleBase
 from tomlkit import dumps as tomlkit_dumps
 from tomlkit import parse as tomlkit_parse
@@ -17,6 +19,21 @@ from ellar_cli.schema import EllarPyProjectSerializer
 PY_PROJECT_TOML = "pyproject.toml"
 ELLAR_DEFAULT_KEY = "default"
 ELLAR_PROJECTS_KEY = "projects"
+
+
+def _export_ellar_config_module(func: t.Callable) -> t.Callable:
+    """Ensure Ellar Config Module is Exported"""
+
+    @functools.wraps(func)
+    def _wrap(self: "EllarCLIService", *args: t.Any, **kwargs: t.Any) -> t.Any:
+        if os.environ.get(ELLAR_CONFIG_MODULE) is None and self.has_meta:
+            # export ELLAR_CONFIG_MODULE module
+            os.environ.setdefault(
+                ELLAR_CONFIG_MODULE, self._meta.config  # type:ignore[union-attr]
+            )
+        return func(self, *args, **kwargs)
+
+    return _wrap
 
 
 class EllarCLIException(ClickException):
@@ -189,6 +206,7 @@ class EllarCLIService:
         with open(path, mode="w") as fw:
             fw.writelines(tomlkit_dumps(content))
 
+    @_export_ellar_config_module
     def import_application(self) -> "App":
         assert self._meta
         application_module = t.cast("App", import_from_string(self._meta.application))
@@ -199,14 +217,21 @@ class EllarCLIService:
         config = t.cast(t.Type["Config"], import_from_string(self._meta.config))
         return config
 
+    @_export_ellar_config_module
     def get_application_config(self) -> "Config":
         assert self._meta
         config = Config(os.environ.get(ELLAR_CONFIG_MODULE, self._meta.config))
         return config
 
+    @_export_ellar_config_module
     def import_root_module(self) -> t.Type["ModuleBase"]:
         assert self._meta
         root_module = t.cast(
             t.Type["ModuleBase"], import_from_string(self._meta.root_module)
         )
         return root_module
+
+    @_export_ellar_config_module
+    def get_application_context(self) -> ApplicationContext:
+        app = t.cast(App, self.import_application())
+        return app.application_context()

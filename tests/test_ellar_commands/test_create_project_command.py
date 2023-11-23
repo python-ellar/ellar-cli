@@ -13,10 +13,15 @@ def test_create_project_fails_for_py_project_none(cli_runner):
 
 
 def test_create_project_fails_for_existing_project_name(
-    cli_runner, add_ellar_project_to_py_project
+    cli_runner, write_empty_py_project, tmpdir
 ):
-    add_ellar_project_to_py_project("testing_new_project")
-    result = cli_runner.invoke_ellar_command(["create-project", "testing_new_project"])
+    module_name = "testing_new_project"
+    os.makedirs(os.path.join(tmpdir, module_name), exist_ok=True)
+    # add_ellar_project_to_py_project("testing_new_project")
+    result = cli_runner.invoke_ellar_command(["create-project", module_name])
+    assert result.exit_code == 0
+    result = cli_runner.invoke_ellar_command(["create-project", module_name])
+
     assert result.exit_code == 1
     assert result.output == "Error: Ellar Project already exist.\n"
 
@@ -54,7 +59,7 @@ def test_create_project_works_for_existing_folder_with_same_project_name(
     os.makedirs(os.path.join(tmpdir, module_name), exist_ok=True)
 
     result = cli_runner.invoke_ellar_command(["create-project", module_name])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stderr
     assert result.output == (
         "`new_project_module_2` project scaffold completed. To start your server, run the command below\n"
         "ellar --project new_project_module_2 runserver --reload\n"
@@ -64,7 +69,7 @@ def test_create_project_works_for_existing_folder_with_same_project_name(
 
 def test_create_project_command_works(tmpdir, process_runner, write_empty_py_project):
     result = process_runner(["ellar", "create-project", "ellar_project"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout.decode("utf8") == (
         "`ellar_project` project scaffold completed. To start your server, run the command below\n"
         "ellar --project ellar_project runserver --reload\n"
@@ -86,7 +91,7 @@ def test_create_project_command_works_with_specific_directory(
     tmpdir, process_runner, write_empty_py_project
 ):
     result = process_runner(["ellar", "create-project", "ellar_project", "Another/me"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout.decode("utf8") == (
         "`ellar_project` project scaffold completed. To start your server, run the command below\n"
         "ellar --project ellar_project runserver --reload\n"
