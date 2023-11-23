@@ -7,7 +7,7 @@ from ellar_cli.service import EllarCLIService
 
 def test_new_command_works(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout.decode("utf8") == (
         "`ellar_project_new` project created successfully.\n"
         "- cd ellar-project-new\n"
@@ -27,7 +27,7 @@ def test_new_command_works(tmpdir, process_runner):
 
 def test_new_command_works_with_specific_directory_case_1(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout.decode("utf8") == (
         "`ellar_project_new` project created successfully.\n"
         "- cd another/me\n"
@@ -49,7 +49,7 @@ def test_new_command_works_with_specific_directory_case_3(tmpdir, process_runner
     _path = tmpdir / "23-August-2023"
     os.makedirs(_path)
     result = process_runner(["ellar", "new", "ellar-project-new", str(_path)])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert (
         "ellar --project ellar_project_new runserver --reload"
         in result.stdout.decode("utf8")
@@ -58,7 +58,7 @@ def test_new_command_works_with_specific_directory_case_3(tmpdir, process_runner
 
 def test_new_command_fails_case_1(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
     assert result.returncode == 1
     assert "Scaffolding Project Directory is not empty." in result.stderr.decode("utf8")
@@ -66,7 +66,7 @@ def test_new_command_fails_case_1(tmpdir, process_runner):
 
 def test_new_command_works_with_specific_directory_case_2(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new", "."])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout.decode("utf8") == (
         "`ellar_project_new` project created successfully.\n\n"
         "To start your server, run the command below\n"

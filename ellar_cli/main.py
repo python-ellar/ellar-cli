@@ -8,8 +8,8 @@ import typer
 from ellar.app import AppFactory
 from ellar.common.commands import EllarTyper
 from ellar.common.constants import CALLABLE_COMMAND_INFO, MODULE_METADATA
+from ellar.core import reflector
 from ellar.core.modules import ModuleSetup
-from ellar.core.services import Reflector
 from typer.models import CommandInfo
 
 import ellar_cli
@@ -59,6 +59,8 @@ def typer_callback(
 ) -> None:
     meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(project)
     ctx.meta[ELLAR_META] = meta_
+    if meta_ and meta_.has_meta:
+        ctx.with_resource(meta_.get_application_context())
 
 
 def build_typers() -> t.Any:  # pragma: no cover
@@ -82,7 +84,6 @@ def build_typers() -> t.Any:  # pragma: no cover
         module_configs = AppFactory.get_all_modules(
             ModuleSetup(meta_.import_root_module())
         )
-        reflector = Reflector()
 
         for module_config in module_configs:
             typers_commands = (

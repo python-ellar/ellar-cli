@@ -14,7 +14,7 @@ def test_create_module_fails_for_invalid_module_name(
 
 def test_create_module_with_directory_case_1(process_runner, tmpdir):
     result = process_runner(["ellar", "create-module", "test_new_module", "app/"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout == b"test_new_module module completely scaffolded\n"
 
     module_path = os.path.join(tmpdir, "app", "test_new_module")
@@ -36,7 +36,7 @@ def test_create_module_with_directory_case_2(process_runner, tmpdir):
     result = process_runner(
         ["ellar", "create-module", "test_new_module", "."], cwd=tmpdir
     )
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout == b"test_new_module module completely scaffolded\n"
 
     files = os.listdir(tmpdir / "test_new_module")
@@ -101,7 +101,7 @@ def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
             "test_new_module",
         ]
     )
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert result.stdout == b"test_new_module module completely scaffolded\n"
 
     module_path = os.path.join(tmpdir, "test_new_module")
