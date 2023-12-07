@@ -1,7 +1,7 @@
 import typing as t
 
 from ellar.common.serializer import Serializer
-from pydantic import Field
+from ellar.pydantic import Field
 
 
 class EllarPyProjectSerializer(Serializer):
@@ -16,9 +16,6 @@ class EllarScaffoldList(Serializer):
     is_directory: bool = False
     name_in_context: t.Optional[bool] = Field(default=None, alias="name-context")
     files: t.List["EllarScaffoldList"] = Field(default=[])
-
-
-EllarScaffoldList.update_forward_refs()
 
 
 class EllarScaffoldSchema(Serializer):
@@ -37,3 +34,6 @@ class EllarScaffoldSchema(Serializer):
                 },
             ],
         )
+
+
+EllarScaffoldList.model_rebuild()

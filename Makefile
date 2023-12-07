@@ -23,7 +23,7 @@ lint: ## Run code linters
 	mypy ellar_cli
 
 fmt format: ## Run code formatters
-	black ellar_cli tests
+	ruff format ellar_cli tests
 	ruff check --fix ellar_cli tests
 
 test: ## Run tests

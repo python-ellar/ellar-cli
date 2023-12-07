@@ -37,7 +37,7 @@ def test_import_project_meta_returns_default_project_when_project_is_none(
 
     ellar_cli_service = EllarCLIService.import_project_meta()
 
-    assert ellar_cli_service._meta.dict() == {
+    assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "some-project",
         "application": "some-project.server:application",
         "config": "some-project.config:DevelopmentConfig",
@@ -55,7 +55,7 @@ def test_import_project_meta_returns_meta_for_a_project(
     add_ellar_project_to_py_project("some-other-project")
 
     ellar_cli_service = EllarCLIService.import_project_meta("some-other-project")
-    assert ellar_cli_service._meta.dict() == {
+    assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "some-other-project",
         "application": "some-other-project.server:application",
         "config": "some-other-project.config:DevelopmentConfig",
@@ -102,7 +102,7 @@ def test_create_ellar_project_meta_work(
     )
     cli_service.create_ellar_project_meta("new-project")
     ellar_cli_service = EllarCLIService.import_project_meta("new-project")
-    assert ellar_cli_service._meta.dict() == {
+    assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "new-project",
         "application": "new-project.server:application",
         "config": "new-project.config:DevelopmentConfig",
@@ -142,7 +142,7 @@ def test_import_application_works(tmp_path, write_empty_py_project, process_runn
     result = process_runner(["ellar", "create-project", "new_project_one"])
     assert result.returncode == 0
     ellar_cli_service = EllarCLIService.import_project_meta()
-    assert ellar_cli_service._meta.dict() == {
+    assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "new_project_one",
         "application": "new_project_one.server:application",
         "config": "new_project_one.config:DevelopmentConfig",
