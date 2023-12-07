@@ -8,7 +8,7 @@ export ELLAR_CONFIG_MODULE={{project_name}}.config:DevelopmentConfig
 
 import typing as t
 
-from pydantic.json import ENCODERS_BY_TYPE as encoders_by_type
+from ellar.pydantic import ENCODERS_BY_TYPE as encoders_by_type
 from starlette.middleware import Middleware
 from ellar.common import IExceptionHandler, JSONResponse
 from ellar.core import ConfigDefaultTypesMixin

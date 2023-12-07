@@ -29,7 +29,8 @@ def _export_ellar_config_module(func: t.Callable) -> t.Callable:
         if os.environ.get(ELLAR_CONFIG_MODULE) is None and self.has_meta:
             # export ELLAR_CONFIG_MODULE module
             os.environ.setdefault(
-                ELLAR_CONFIG_MODULE, self._meta.config  # type:ignore[union-attr]
+                ELLAR_CONFIG_MODULE,
+                self._meta.config,  # type:ignore[union-attr]
             )
         return func(self, *args, **kwargs)
 
