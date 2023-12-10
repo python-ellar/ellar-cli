@@ -145,7 +145,7 @@ class EllarCLIService:
                         else ellar_py_projects.default_project
                     )
 
-                    _ellar_pyproject_serializer = cls.schema_cls.parse_obj(
+                    _ellar_pyproject_serializer = cls.schema_cls.model_validate(
                         ellar_py_projects.get_project(project_to_load)
                     )
 
