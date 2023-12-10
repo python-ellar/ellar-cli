@@ -155,7 +155,7 @@ def test_import_application_works(tmp_path, write_empty_py_project, process_runn
 
 def test_import_configuration_works(tmpdir, write_empty_py_project, process_runner):
     result = process_runner(["ellar", "create-project", "new_project_two"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
 
     ellar_cli_service = EllarCLIService.import_project_meta()
     config = ellar_cli_service.import_configuration()
@@ -165,7 +165,7 @@ def test_import_configuration_works(tmpdir, write_empty_py_project, process_runn
 
 def test_import_root_module_works(write_empty_py_project, process_runner):
     result = process_runner(["ellar", "create-project", "new_project_three"])
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
 
     ellar_cli_service = EllarCLIService.import_project_meta()
     root_module = ellar_cli_service.import_root_module()
