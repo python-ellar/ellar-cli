@@ -29,15 +29,6 @@
           "files": [
             {
               "name": "__init__.ellar"
-            },
-            {
-              "name": "test_controllers.ellar"
-            },
-            {
-              "name": "test_routers.ellar"
-            },
-            {
-              "name": "test_services.ellar"
             }
           ]
         }
