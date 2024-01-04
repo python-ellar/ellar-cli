@@ -4,9 +4,9 @@ import typing as t
 from importlib import import_module
 from pathlib import Path
 
-import typer
 from ellar.common.utils.module_loading import module_dir
 
+import ellar_cli.click as eClick
 from ellar_cli import scaffolding
 from ellar_cli.schema import EllarScaffoldSchema
 
@@ -72,14 +72,13 @@ class ModuleTemplateScaffold(FileTemplateScaffold):
         return template_context
 
 
-def create_module(
-    module_name: str,
-    directory: t.Optional[str] = typer.Argument(
-        None,
-        help="The name of a new directory to scaffold the module into.",
-        show_default=False,
-    ),
-):
+@eClick.argument("module_name")
+@eClick.argument(
+    "directory",
+    help="The name of a new directory to scaffold the module into.",
+    required=False,
+)
+def create_module(module_name: str, directory: t.Optional[str]):
     """- Scaffolds Ellar Application Module -"""
 
     schema = EllarScaffoldSchema.parse_file(module_template_json)

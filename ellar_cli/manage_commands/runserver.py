@@ -1,14 +1,14 @@
+from __future__ import annotations
+
 import ssl
-import sys
 import typing as t
 from datetime import datetime
-from pathlib import Path
 
 import ellar
-import typer
 from ellar.app import current_config
 from ellar.common.utils.enums import create_enums_from_list
-from h11._connection import DEFAULT_MAX_INCOMPLETE_EVENT_SIZE
+from uvicorn import config as uvicorn_config
+from uvicorn import run as uvicorn_run
 from uvicorn.config import (
     HTTP_PROTOCOLS,
     INTERFACES,
@@ -19,223 +19,364 @@ from uvicorn.config import (
     SSL_PROTOCOL_VERSION,
     WS_PROTOCOLS,
 )
-from uvicorn.main import run as uvicorn_run
 
+import ellar_cli.click as eClick
 from ellar_cli.constants import ELLAR_META
-
-from ..service import EllarCLIException, EllarCLIService
+from ellar_cli.service import EllarCLIException, EllarCLIService
 
 __all__ = ["runserver"]
 
-
-HTTP_CHOICES = create_enums_from_list("HTTP_CHOICES", *list(HTTP_PROTOCOLS.keys()))
-WS_CHOICES = create_enums_from_list("WS_CHOICES", *list(WS_PROTOCOLS.keys()))
-LIFESPAN_CHOICES = create_enums_from_list("LIFESPAN_CHOICES", *list(LIFESPAN.keys()))
-LOOP_CHOICES = create_enums_from_list(
-    "LOOP_CHOICES", *[key for key in LOOP_SETUPS.keys() if key != "none"]
-)
-INTERFACE_CHOICES = create_enums_from_list("INTERFACES", *INTERFACES)
 _LOG_LEVELS = dict(**LOG_LEVELS, NOT_SET=0)
 LOG_LEVELS_CHOICES = create_enums_from_list("LOG_LEVELS", *list(_LOG_LEVELS.keys()))
 
+LEVEL_CHOICES = eClick.Choice(list(LOG_LEVELS.keys()))
+HTTP_CHOICES = eClick.Choice(list(HTTP_PROTOCOLS.keys()))
+WS_CHOICES = eClick.Choice(list(WS_PROTOCOLS.keys()))
 
+LIFESPAN_CHOICES = eClick.Choice(list(LIFESPAN.keys()))
+LOOP_CHOICES = eClick.Choice([key for key in LOOP_SETUPS.keys() if key != "none"])
+INTERFACE_CHOICES = eClick.Choice(INTERFACES)
+
+
+@eClick.option(
+    "--host",
+    type=str,
+    default="127.0.0.1",
+    help="Bind socket to this host.",
+    show_default=True,
+)
+@eClick.option(
+    "--port",
+    type=int,
+    default=8000,
+    help="Bind socket to this port. If 0, an available port will be picked.",
+    show_default=True,
+)
+@eClick.option("--uds", type=str, default=None, help="Bind to a UNIX domain socket.")
+@eClick.option(
+    "--fd", type=int, default=None, help="Bind to socket from this file descriptor."
+)
+@eClick.option("--reload", is_flag=True, default=False, help="Enable auto-reload.")
+@eClick.option(
+    "--reload-dir",
+    "reload_dirs",
+    multiple=True,
+    help="Set reload directories explicitly, instead of using the current working"
+    " directory.",
+    type=eClick.Path(exists=True),
+)
+@eClick.option(
+    "--reload-include",
+    "reload_includes",
+    multiple=True,
+    help="Set glob patterns to include while watching for files. Includes '*.py' "
+    "by default; these defaults can be overridden with `--reload-exclude`. "
+    "This option has no effect unless watchfiles is installed.",
+)
+@eClick.option(
+    "--reload-exclude",
+    "reload_excludes",
+    multiple=True,
+    help="Set glob patterns to exclude while watching for files. Includes "
+    "'.*, .py[cod], .sw.*, ~*' by default; these defaults can be overridden "
+    "with `--reload-include`. This option has no effect unless watchfiles is "
+    "installed.",
+)
+@eClick.option(
+    "--reload-delay",
+    type=float,
+    default=0.25,
+    show_default=True,
+    help="Delay between previous and next check if application needs to be."
+    " Defaults to 0.25s.",
+)
+@eClick.option(
+    "--workers",
+    default=None,
+    type=int,
+    help="Number of worker processes. Defaults to the $WEB_CONCURRENCY environment"
+    " variable if available, or 1. Not valid with --reload.",
+)
+@eClick.option(
+    "--loop",
+    type=LOOP_CHOICES,
+    default="auto",
+    help="Event loop implementation.",
+    show_default=True,
+)
+@eClick.option(
+    "--http",
+    type=HTTP_CHOICES,
+    default="auto",
+    help="HTTP protocol implementation.",
+    show_default=True,
+)
+@eClick.option(
+    "--ws",
+    type=WS_CHOICES,
+    default="auto",
+    help="WebSocket protocol implementation.",
+    show_default=True,
+)
+@eClick.option(
+    "--ws-max-size",
+    type=int,
+    default=16777216,
+    help="WebSocket max size message in bytes",
+    show_default=True,
+)
+@eClick.option(
+    "--ws-max-queue",
+    type=int,
+    default=32,
+    help="The maximum length of the WebSocket message queue.",
+    show_default=True,
+)
+@eClick.option(
+    "--ws-ping-interval",
+    type=float,
+    default=20.0,
+    help="WebSocket ping interval in seconds.",
+    show_default=True,
+)
+@eClick.option(
+    "--ws-ping-timeout",
+    type=float,
+    default=20.0,
+    help="WebSocket ping timeout in seconds.",
+    show_default=True,
+)
+@eClick.option(
+    "--ws-per-message-deflate",
+    type=bool,
+    default=True,
+    help="WebSocket per-message-deflate compression",
+    show_default=True,
+)
+@eClick.option(
+    "--lifespan",
+    type=LIFESPAN_CHOICES,
+    default="auto",
+    help="Lifespan implementation.",
+    show_default=True,
+)
+@eClick.option(
+    "--interface",
+    type=INTERFACE_CHOICES,
+    default="auto",
+    help="Select ASGI3, ASGI2, or WSGI as the application interface.",
+    show_default=True,
+)
+@eClick.option(
+    "--env-file",
+    type=eClick.Path(exists=True),
+    default=None,
+    help="Environment configuration file.",
+    show_default=True,
+)
+@eClick.option(
+    "--log-level",
+    type=LEVEL_CHOICES,
+    default=None,
+    help="Log level. [default: info]",
+    show_default=True,
+)
+@eClick.option(
+    "--access-log/--no-access-log",
+    is_flag=True,
+    default=True,
+    help="Enable/Disable access log.",
+)
+@eClick.option(
+    "--use-colors/--no-use-colors",
+    is_flag=True,
+    default=None,
+    help="Enable/Disable colorized logging.",
+)
+@eClick.option(
+    "--proxy-headers/--no-proxy-headers",
+    is_flag=True,
+    default=True,
+    help="Enable/Disable X-Forwarded-Proto, X-Forwarded-For, X-Forwarded-Port to "
+    "populate remote address info.",
+)
+@eClick.option(
+    "--server-header/--no-server-header",
+    is_flag=True,
+    default=True,
+    help="Enable/Disable default Server header.",
+)
+@eClick.option(
+    "--date-header/--no-date-header",
+    is_flag=True,
+    default=True,
+    help="Enable/Disable default Date header.",
+)
+@eClick.option(
+    "--forwarded-allow-ips",
+    type=str,
+    default=None,
+    help="Comma separated list of IPs to trust with proxy headers. Defaults to"
+    " the $FORWARDED_ALLOW_IPS environment variable if available, or '127.0.0.1'.",
+)
+@eClick.option(
+    "--root-path",
+    type=str,
+    default="",
+    help="Set the ASGI 'root_path' for applications submounted below a given URL path.",
+)
+@eClick.option(
+    "--limit-concurrency",
+    type=int,
+    default=None,
+    help="Maximum number of concurrent connections or tasks to allow, before issuing"
+    " HTTP 503 responses.",
+)
+@eClick.option(
+    "--backlog",
+    type=int,
+    default=2048,
+    help="Maximum number of connections to hold in backlog",
+)
+@eClick.option(
+    "--limit-max-requests",
+    type=int,
+    default=None,
+    help="Maximum number of requests to service before terminating the process.",
+)
+@eClick.option(
+    "--timeout-keep-alive",
+    type=int,
+    default=5,
+    help="Close Keep-Alive connections if no new data is received within this timeout.",
+    show_default=True,
+)
+@eClick.option(
+    "--timeout-graceful-shutdown",
+    type=int,
+    default=None,
+    help="Maximum number of seconds to wait for graceful shutdown.",
+)
+@eClick.option(
+    "--ssl-keyfile", type=str, default=None, help="SSL key file", show_default=True
+)
+@eClick.option(
+    "--ssl-certfile",
+    type=str,
+    default=None,
+    help="SSL certificate file",
+    show_default=True,
+)
+@eClick.option(
+    "--ssl-keyfile-password",
+    type=str,
+    default=None,
+    help="SSL keyfile password",
+    show_default=True,
+)
+@eClick.option(
+    "--ssl-version",
+    type=int,
+    default=int(SSL_PROTOCOL_VERSION),
+    help="SSL version to use (see stdlib ssl module's)",
+    show_default=True,
+)
+@eClick.option(
+    "--ssl-cert-reqs",
+    type=int,
+    default=int(ssl.CERT_NONE),
+    help="Whether client certificate is required (see stdlib ssl module's)",
+    show_default=True,
+)
+@eClick.option(
+    "--ssl-ca-certs",
+    type=str,
+    default=None,
+    help="CA certificates file",
+    show_default=True,
+)
+@eClick.option(
+    "--ssl-ciphers",
+    type=str,
+    default="TLSv1",
+    help="Ciphers to use (see stdlib ssl module's)",
+    show_default=True,
+)
+@eClick.option(
+    "--header",
+    "headers",
+    multiple=True,
+    help="Specify custom default HTTP response headers as a Name:Value pair",
+)
+# @eClick.option(
+#     "--app-dir",
+#     default="",
+#     show_default=True,
+#     help="Look for APP in the specified directory, by adding this to the PYTHONPATH."
+#     " Defaults to the current working directory.",
+# )
+@eClick.option(
+    "--h11-max-incomplete-event-size",
+    "h11_max_incomplete_event_size",
+    type=int,
+    default=None,
+    help="For h11, the maximum number of bytes to buffer of an incomplete event.",
+)
+@eClick.option(
+    "--factory",
+    is_flag=True,
+    default=False,
+    help="Treat APP as an application factory, i.e. a () -> <ASGI app> callable.",
+    show_default=True,
+)
+@eClick.pass_context
 def runserver(
-    ctx: typer.Context,
-    host: str = typer.Option(
-        "127.0.0.1", help="Bind socket to this host.", show_default=True
-    ),
-    port: int = typer.Option(8000, help="Bind socket to this port.", show_default=True),
-    uds: t.Optional[str] = typer.Option(None, help="Bind to a UNIX domain socket."),
-    fd: t.Optional[int] = typer.Option(
-        None, help="Bind to socket from this file descriptor."
-    ),
-    reload: bool = typer.Option(False, help="Enable auto-reload.", is_flag=True),
-    reload_dirs: t.List[Path] = typer.Option(
-        [],
-        "--reload-dir",
-        help="Set reload directories explicitly, instead of using the current working directory.",
-        exists=True,
-    ),
-    reload_includes: t.List[str] = typer.Option(
-        [],
-        "--reload-include",
-        help="Set glob patterns to include while watching for files. Includes '*.py' "
-        "by default; these defaults can be overridden with `--reload-exclude`. "
-        "This option has no effect unless watchfiles is installed.",
-        exists=True,
-    ),
-    reload_excludes: t.List[str] = typer.Option(
-        [],
-        "--reload-exclude",
-        help="Set glob patterns to exclude while watching for files. Includes "
-        "'.*, .py[cod], .sw.*, ~*' by default; these defaults can be overridden "
-        "with `--reload-include`. This option has no effect unless watchfiles is "
-        "installed.",
-    ),
-    reload_delay: float = typer.Option(
-        0.25,
-        show_default=True,
-        help="Delay between previous and next check if application needs to be. Defaults to 0.25s.",
-    ),
-    workers: t.Optional[int] = typer.Option(
-        None,
-        show_default=True,
-        help="Number of worker processes. Defaults to the $WEB_CONCURRENCY environment"
-        " variable if available, or 1. Not valid with --reload.",
-    ),
-    loop: LOOP_CHOICES = typer.Option(
-        LOOP_CHOICES.auto.value, show_default=True, help="Event loop implementation."
-    ),
-    http: HTTP_CHOICES = typer.Option(
-        HTTP_CHOICES.auto.value, show_default=True, help="HTTP protocol implementation."
-    ),
-    ws: WS_CHOICES = typer.Option(
-        WS_CHOICES.auto.value,
-        show_default=True,
-        help="WebSocket protocol implementation.",
-    ),
-    ws_max_size: int = typer.Option(
-        16777216, show_default=True, help="WebSocket max size message in bytes"
-    ),
-    ws_ping_interval: float = typer.Option(
-        20.0, show_default=True, help="WebSocket ping interval"
-    ),
-    ws_ping_timeout: float = typer.Option(
-        20.0, show_default=True, help="WebSocket ping timeout"
-    ),
-    ws_per_message_deflate: bool = typer.Option(
-        True, show_default=True, help="WebSocket per-message-deflate compression"
-    ),
-    lifespan: LIFESPAN_CHOICES = typer.Option(
-        LIFESPAN_CHOICES.auto.value, show_default=True, help="Lifespan implementation."
-    ),
-    interface: INTERFACE_CHOICES = typer.Option(
-        INTERFACE_CHOICES.auto.value,
-        show_default=True,
-        help="Select ASGI3, ASGI2, or WSGI as the application interface.",
-    ),
-    env_file: t.Optional[Path] = typer.Option(
-        None, show_default=True, exists=True, help="Environment configuration file."
-    ),
-    log_level: LOG_LEVELS_CHOICES = typer.Option(
-        LOG_LEVELS_CHOICES.NOT_SET.value,
-        show_default=True,
-        help="Log level. [default: None]",
-    ),
-    access_log: bool = typer.Option(
-        True,
-        "--access-log/--no-access-log",
-        is_flag=True,
-        help="Enable/Disable access log.",
-    ),
-    use_colors: t.Optional[bool] = typer.Option(
-        None,
-        "--use-colors/--no-use-colors",
-        is_flag=True,
-        help="Enable/Disable colorized logging.",
-    ),
-    proxy_headers: bool = typer.Option(
-        True,
-        "--proxy-headers/--no-proxy-headers",
-        is_flag=True,
-        help="Enable/Disable X-Forwarded-Proto, X-Forwarded-For, X-Forwarded-Port to "
-        "populate remote address info.",
-    ),
-    server_header: bool = typer.Option(
-        True,
-        "--server-header/--no-server-header",
-        is_flag=True,
-        help="Enable/Disable default Server header.",
-    ),
-    date_header: bool = typer.Option(
-        True,
-        "--date-header/--no-date-header",
-        is_flag=True,
-        help="Enable/Disable default Date header.",
-    ),
-    forwarded_allow_ips: t.Optional[str] = typer.Option(
-        None,
-        help="Comma separated list of IPs to trust with proxy headers. Defaults to"
-        " the $FORWARDED_ALLOW_IPS environment variable if available, or '127.0.0.1'.",
-    ),
-    root_path: str = typer.Option(
-        "",
-        help="Set the ASGI '--root-path' for applications sub-mounted below a given URL path.",
-    ),
-    limit_concurrency: t.Optional[int] = typer.Option(
-        None,
-        help="Maximum number of concurrent connections or tasks to allow, before issuing"
-        " HTTP 503 responses.",
-    ),
-    backlog: int = typer.Option(
-        2048,
-        help="Maximum number of connections to hold in backlog",
-    ),
-    limit_max_requests: t.Optional[int] = typer.Option(
-        None,
-        help="Maximum number of requests to service before terminating the process.",
-    ),
-    timeout_keep_alive: int = typer.Option(
-        5,
-        help="Close Keep-Alive connections if no new data is received within this timeout.",
-        show_default=True,
-    ),
-    ssl_keyfile: t.Optional[str] = typer.Option(
-        None,
-        help="SSL key file",
-        show_default=True,
-    ),
-    ssl_certfile: t.Optional[str] = typer.Option(
-        None,
-        help="SSL certificate file",
-        show_default=True,
-    ),
-    ssl_keyfile_password: t.Optional[str] = typer.Option(
-        None,
-        help="SSL keyfile password",
-        show_default=True,
-    ),
-    ssl_version: int = typer.Option(
-        int(SSL_PROTOCOL_VERSION),
-        help="SSL version to use (see stdlib ssl module's)",
-        show_default=True,
-    ),
-    ssl_cert_reqs: int = typer.Option(
-        int(ssl.CERT_NONE),
-        help="Whether client certificate is required (see stdlib ssl module's)",
-        show_default=True,
-    ),
-    ssl_ca_certs: t.Optional[str] = typer.Option(
-        None,
-        help="CA certificates file",
-        show_default=True,
-    ),
-    ssl_ciphers: str = typer.Option(
-        "TLSv1",
-        help="Ciphers to use (see stdlib ssl module's)",
-        show_default=True,
-    ),
-    headers: t.List[str] = typer.Option(
-        [],
-        "--header",
-        help="Specify custom default HTTP response headers as a Name:Value pair",
-    ),
-    app_dir: str = typer.Option(
-        default=".",
-        show_default=True,
-        help="Look for APP in the specified directory, by adding this to the PYTHONPATH."
-        " Defaults to the current working directory.",
-    ),
-    h11_max_incomplete_event_size: int = typer.Option(
-        default=DEFAULT_MAX_INCOMPLETE_EVENT_SIZE,
-        help="For h11, the maximum number of bytes to buffer of an incomplete event.",
-    ),
-    factory: bool = typer.Option(
-        is_flag=True,
-        default=False,
-        help="Treat APP as an application factory, i.e. a () -> <ASGI app> callable.",
-        show_default=True,
-    ),
+    ctx: eClick.Context,
+    host: str,
+    port: int,
+    uds: str,
+    fd: int,
+    loop: uvicorn_config.LoopSetupType,
+    http: uvicorn_config.HTTPProtocolType,
+    ws: uvicorn_config.WSProtocolType,
+    ws_max_size: int,
+    ws_max_queue: int,
+    ws_ping_interval: float,
+    ws_ping_timeout: float,
+    ws_per_message_deflate: bool,
+    lifespan: uvicorn_config.LifespanType,
+    interface: uvicorn_config.InterfaceType,
+    reload: bool,
+    reload_dirs: list[str],
+    reload_includes: list[str],
+    reload_excludes: list[str],
+    reload_delay: float,
+    workers: int,
+    env_file: str,
+    log_level: str,
+    access_log: bool,
+    proxy_headers: bool,
+    server_header: bool,
+    date_header: bool,
+    forwarded_allow_ips: str,
+    root_path: str,
+    limit_concurrency: int,
+    backlog: int,
+    limit_max_requests: int,
+    timeout_keep_alive: int,
+    timeout_graceful_shutdown: int | None,
+    ssl_keyfile: str,
+    ssl_certfile: str,
+    ssl_keyfile_password: str,
+    ssl_version: int,
+    ssl_cert_reqs: int,
+    ssl_ca_certs: str,
+    ssl_ciphers: str,
+    headers: list[str],
+    use_colors: bool,
+    # app_dir: str,
+    h11_max_incomplete_event_size: int | None,
+    factory: bool,
 ):
     """- Starts Uvicorn Server -"""
     ellar_project_meta = t.cast(t.Optional[EllarCLIService], ctx.meta.get(ELLAR_META))
@@ -259,21 +400,24 @@ def runserver(
 
     init_kwargs = {
         "host": host,
+        "ws_max_queue": ws_max_queue,
         "port": port,
         "uds": uds,
         "fd": fd,
-        "loop": loop.value,
-        "http": http.value,
-        "ws": ws.value,
+        "loop": loop,
+        "http": http,
+        "ws": ws,
         "ws_max_size": ws_max_size,
+        "ws_per_message_deflate": ws_per_message_deflate,
         "ws_ping_interval": ws_ping_interval,
         "ws_ping_timeout": ws_ping_timeout,
-        "lifespan": lifespan.value,
+        "timeout_graceful_shutdown": timeout_graceful_shutdown,
+        "lifespan": lifespan,
         "env_file": env_file,
         "log_config": LOGGING_CONFIG if log_config is None else log_config,
         "log_level": _log_level.value if _log_level.value != "NOT_SET" else None,
         "access_log": access_log,
-        "interface": interface.value,
+        "interface": interface,
         "reload": reload,
         "reload_dirs": reload_dirs or None,
         "reload_includes": reload_includes or None,
@@ -292,6 +436,7 @@ def runserver(
         "ssl_keyfile": ssl_keyfile,
         "ssl_certfile": ssl_certfile,
         "ssl_keyfile_password": ssl_keyfile_password,
+        "h11_max_incomplete_event_size": h11_max_incomplete_event_size,
         "ssl_version": ssl_version,
         "ssl_cert_reqs": ssl_cert_reqs,
         "ssl_ca_certs": ssl_ca_certs,
@@ -299,13 +444,8 @@ def runserver(
         "headers": [header.split(":", 1) for header in headers],
         "use_colors": use_colors,
         "factory": factory,
-        "app_dir": app_dir,
+        # "app_dir": application_import_string.split(':')[0].replace('.', '/'),
     }
-    if sys.version_info >= (3, 7):
-        init_kwargs.update(
-            h11_max_incomplete_event_size=h11_max_incomplete_event_size,
-            ws_per_message_deflate=ws_per_message_deflate,
-        )
 
     now = datetime.now().strftime("%B %d, %Y - %X")
     version = ellar.__version__

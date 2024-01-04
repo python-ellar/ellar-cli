@@ -100,6 +100,7 @@ class EllarCLIService:
         ellar_py_projects: t.Optional[EllarPyProject] = None,
     ) -> None:
         self._meta = meta
+        self._store: t.Dict[str, t.Any] = {}
         self.py_project_path = py_project_path
         self.cwd = cwd
         self.app = app_name
@@ -210,27 +211,37 @@ class EllarCLIService:
     @_export_ellar_config_module
     def import_application(self) -> "App":
         assert self._meta
-        application_module = t.cast("App", import_from_string(self._meta.application))
-        return application_module
+        if "App" not in self._store:
+            self._store["App"] = t.cast(
+                "App", import_from_string(self._meta.application)
+            )
+        return self._store["App"]  # type:ignore[no-any-return]
 
     def import_configuration(self) -> t.Type["Config"]:
         assert self._meta
-        config = t.cast(t.Type["Config"], import_from_string(self._meta.config))
-        return config
+        if "Config" not in self._store:
+            self._store["Config"] = t.cast(
+                t.Type["Config"], import_from_string(self._meta.config)
+            )
+        return self._store["Config"]  # type:ignore[no-any-return]
 
     @_export_ellar_config_module
     def get_application_config(self) -> "Config":
         assert self._meta
-        config = Config(os.environ.get(ELLAR_CONFIG_MODULE, self._meta.config))
-        return config
+        if "ConfigInstance" not in self._store:
+            self._store["ConfigInstance"] = Config(
+                os.environ.get(ELLAR_CONFIG_MODULE, self._meta.config)
+            )
+        return self._store["ConfigInstance"]  # type:ignore[no-any-return]
 
     @_export_ellar_config_module
     def import_root_module(self) -> t.Type["ModuleBase"]:
         assert self._meta
-        root_module = t.cast(
-            t.Type["ModuleBase"], import_from_string(self._meta.root_module)
-        )
-        return root_module
+        if "RootModule" not in self._store:
+            self._store["RootModule"] = t.cast(
+                t.Type["ModuleBase"], import_from_string(self._meta.root_module)
+            )
+        return self._store["RootModule"]  # type:ignore[no-any-return]
 
     @_export_ellar_config_module
     def get_application_context(self) -> ApplicationContext:

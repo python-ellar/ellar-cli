@@ -4,9 +4,9 @@ import typing as t
 from importlib import import_module
 from pathlib import Path
 
-import typer
 from ellar.common.utils.module_loading import module_dir
 
+import ellar_cli.click as eClick
 from ellar_cli import scaffolding
 from ellar_cli.constants import ELLAR_META
 from ellar_cli.schema import EllarScaffoldSchema
@@ -101,14 +101,17 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
         print("Happy coding!")
 
 
+@eClick.argument("project_name", help="Project Name")
+@eClick.argument(
+    "directory",
+    help="The name of a new directory to scaffold the project into.",
+    required=False,
+)
+@eClick.pass_context
 def create_project(
-    ctx: typer.Context,
+    ctx: eClick.Context,
     project_name: str,
-    directory: t.Optional[str] = typer.Argument(
-        None,
-        help="The name of a new directory to scaffold the project into.",
-        show_default=False,
-    ),
+    directory: t.Optional[str],
 ):
     """- Scaffolds Ellar Application -"""
 

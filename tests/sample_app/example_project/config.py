@@ -64,3 +64,5 @@ class BaseConfig(ConfigDefaultTypesMixin):
 
 class DevelopmentConfig(BaseConfig):
     DEBUG: bool = True
+
+    APPLICATION_NAME: str = "example_project"
