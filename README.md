@@ -11,9 +11,9 @@
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-cli.svg)](https://pypi.python.org/pypi/ellar-cli)
 
 # Introduction
-Ellar-CLI is an abstracted tool for the Ellar web framework that helps in the standard project scaffolding and managing typer and click commands.
+Ellar-CLI is an abstracted tool for ellar python web framework that helps in the standard project scaffolding and managing typer and click commands.
 
-Ellar CLI is build on [Click](https://click.palletsprojects.com/en/8.1.x/)
+Ellar CLI is built on [Click](https://click.palletsprojects.com/en/8.1.x/)
 
 ## Installation
 if you have [ellar](https://github.com/python-ellar/ellar) install ready
@@ -26,7 +26,7 @@ To verify ellar-cli is working, run the command belove
 ```shell
 ellar --help
 ```
-Above command should output this:
+The above command should output this:
 ```
 Usage: Ellar, Python Web framework [OPTIONS] COMMAND [ARGS]...
 
