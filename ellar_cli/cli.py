@@ -1,8 +1,6 @@
 import os
 import sys
 
-from typer import echo
-
 import ellar_cli.click as click
 
 from .main import app_cli
@@ -13,7 +11,7 @@ __all__ = ["main"]
 @app_cli.command()
 @click.argument("name")
 def say_hi(name: str):
-    echo(f"Welcome {name}, to Ellar CLI, ASGI Python Web framework\n")
+    click.echo(f"Welcome {name}, to Ellar CLI, ASGI Python Web framework\n")
 
 
 def main():

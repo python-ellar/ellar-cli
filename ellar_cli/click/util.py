@@ -16,11 +16,14 @@ def _async_run(future: t.Coroutine) -> t.Any:
         loop = asyncio.new_event_loop()
 
     if not loop.is_running():
-        res = loop.run_until_complete(loop.create_task(future))
-
-        loop.run_until_complete(loop.shutdown_asyncgens())
-        loop.stop()
-        loop.close()
+        try:
+            res = loop.run_until_complete(loop.create_task(future))
+            loop.run_until_complete(loop.shutdown_asyncgens())
+        except Exception as e:
+            raise e
+        finally:
+            loop.stop()
+            loop.close()
     else:
         res = execute_coroutine_with_sync_worker(future)
 
