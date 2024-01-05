@@ -4,7 +4,7 @@ import ssl
 import typing as t
 from datetime import datetime
 
-import ellar
+from ellar import __version__ as ellar_version
 from ellar.app import current_config
 from ellar.common.utils.enums import create_enums_from_list
 from uvicorn import config as uvicorn_config
@@ -322,13 +322,6 @@ INTERFACE_CHOICES = eClick.Choice(INTERFACES)
     default=None,
     help="For h11, the maximum number of bytes to buffer of an incomplete event.",
 )
-@eClick.option(
-    "--factory",
-    is_flag=True,
-    default=False,
-    help="Treat APP as an application factory, i.e. a () -> <ASGI app> callable.",
-    show_default=True,
-)
 @eClick.pass_context
 def runserver(
     ctx: eClick.Context,
@@ -376,7 +369,6 @@ def runserver(
     use_colors: bool,
     # app_dir: str,
     h11_max_incomplete_event_size: int | None,
-    factory: bool,
 ):
     """- Starts Uvicorn Server -"""
     ellar_project_meta = t.cast(t.Optional[EllarCLIService], ctx.meta.get(ELLAR_META))
@@ -389,9 +381,7 @@ def runserver(
             "No available project found. please create ellar project with `ellar create-project 'project-name'`"
         )
 
-    application_import_string = (
-        None if factory else ellar_project_meta.project_meta.application
-    )
+    application_import_string = ellar_project_meta.project_meta.application
 
     log_config = current_config.LOGGING_CONFIG
     _log_level = current_config.LOG_LEVEL
@@ -443,16 +433,15 @@ def runserver(
         "ssl_ciphers": ssl_ciphers,
         "headers": [header.split(":", 1) for header in headers],
         "use_colors": use_colors,
-        "factory": factory,
+        "factory": ellar_project_meta.is_app_callable(),
         # "app_dir": application_import_string.split(':')[0].replace('.', '/'),
     }
 
     now = datetime.now().strftime("%B %d, %Y - %X")
-    version = ellar.__version__
     print(
         f"\nStarting Uvicorn server...\n"
         f"{now}\n"
-        f"Ellar version {version}, using settings {current_config.config_module!r}\n"
+        f"Ellar version {ellar_version}, using settings {current_config.config_module!r}\n"
     )
 
     uvicorn_run(application_import_string, **init_kwargs)

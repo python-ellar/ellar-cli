@@ -1,3 +1,4 @@
+import asyncio
 import functools
 import os
 import typing as t
@@ -183,7 +184,7 @@ class EllarCLIService:
         ellar_new_project = ellar_py_project.get_or_create_project(project_name.lower())
         ellar_new_project.add("project-name", project_name.lower())
         ellar_new_project.add(
-            "application", f"{_prefix}{project_name}.server:application"
+            "application", f"{_prefix}{project_name}.server:bootstrap"
         )
         ellar_new_project.add(
             "config", f"{_prefix}{project_name}.config:DevelopmentConfig"
@@ -212,10 +213,32 @@ class EllarCLIService:
     def import_application(self) -> "App":
         assert self._meta
         if "App" not in self._store:
-            self._store["App"] = t.cast(
-                "App", import_from_string(self._meta.application)
-            )
+            self._store["App"] = t.cast(App, import_from_string(self._meta.application))
+
+            if not isinstance(self._store["App"], App):
+                # if its factory, we resolve the factory.
+                app_instance = self._store["App"]()
+
+                if isinstance(app_instance, t.Coroutine):
+                    raise EllarCLIException(
+                        "Coroutine Application Bootstrapping is not supported."
+                    )
+                self._store["App"] = app_instance
+
         return self._store["App"]  # type:ignore[no-any-return]
+
+    def is_app_callable(self) -> bool:
+        assert self._meta
+
+        app = import_from_string(self._meta.application)
+        res = not isinstance(app, App)
+
+        if res and asyncio.iscoroutinefunction(app):
+            raise EllarCLIException(
+                "Coroutine Application Bootstrapping is not supported."
+            )
+
+        return res
 
     def import_configuration(self) -> t.Type["Config"]:
         assert self._meta

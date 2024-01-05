@@ -19,7 +19,7 @@ def test_new_command_works(tmpdir, process_runner):
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "ellar_project_new",
-        "application": "ellar_project_new.server:application",
+        "application": "ellar_project_new.server:bootstrap",
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
     }
@@ -39,7 +39,7 @@ def test_new_command_works_with_specific_directory_case_1(tmpdir, process_runner
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "ellar_project_new",
-        "application": "ellar_project_new.server:application",
+        "application": "ellar_project_new.server:bootstrap",
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
     }
@@ -77,7 +77,7 @@ def test_new_command_works_with_specific_directory_case_2(tmpdir, process_runner
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "ellar_project_new",
-        "application": "ellar_project_new.server:application",
+        "application": "ellar_project_new.server:bootstrap",
         "config": "ellar_project_new.config:DevelopmentConfig",
         "root_module": "ellar_project_new.root_module:ApplicationModule",
     }

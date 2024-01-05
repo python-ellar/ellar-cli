@@ -7,11 +7,11 @@ from ellar.core import LazyModuleImport as lazyLoad
 # from ellar.openapi import OpenAPIDocumentModule, OpenAPIDocumentBuilder
 
 
-def bootstrap() -> App:
+async def bootstrap() -> App:
     application = AppFactory.create_from_app_module(
-        lazyLoad("example_project_2.root_module:ApplicationModule"),
+        lazyLoad("example_project_3.root_module:ApplicationModule"),
         config_module=os.environ.get(
-            ELLAR_CONFIG_MODULE, "example_project_2.config:DevelopmentConfig"
+            ELLAR_CONFIG_MODULE, "example_project_3.config:DevelopmentConfig"
         ),
     )
 

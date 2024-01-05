@@ -9,6 +9,11 @@ root-module = "example_project.root_module:ApplicationModule"
 
 [ellar.projects.example_project_2]
 project-name = "example_project_2"
-application = "example_project_2.server:application"
+application = "example_project_2.server:bootstrap"
 config = "example_project_2.config:DevelopmentConfig"
 root-module = "example_project_2.root_module:ApplicationModule"
+[ellar.projects.example_project_3]
+project-name = "example_project_3"
+application = "example_project_3.server:bootstrap"
+config = "example_project_3.config:DevelopmentConfig"
+root-module = "example_project_3.root_module:ApplicationModule"

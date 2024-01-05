@@ -5,7 +5,7 @@ from functools import update_wrapper
 import click
 from ellar.threading import execute_coroutine_with_sync_worker
 
-from ellar_cli.constants import ELLAR_META, ELLAR_PROJECT_NAME
+from ellar_cli.constants import ELLAR_META
 from ellar_cli.service import EllarCLIService
 
 
@@ -52,9 +52,6 @@ def with_app_context(f: t.Callable) -> t.Any:
 
     @click.pass_context
     def decorator(__ctx: click.Context, *args: t.Any, **kwargs: t.Any) -> t.Any:
-        meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(
-            __ctx.meta.get(ELLAR_PROJECT_NAME)
-        )
         meta_ = __ctx.meta.get(ELLAR_META)
 
         def _get_command_args(*ar: t.Any, **kw: t.Any) -> t.Any:

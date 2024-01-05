@@ -1,11 +1,14 @@
+import importlib
 import os
 import subprocess
 import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
 sample_app_path = os.path.join(Path(__file__).parent, "sample_app")
+runserver = importlib.import_module("ellar_cli.manage_commands.runserver")
 
 
 @pytest.fixture()
@@ -111,4 +114,52 @@ def test_command_with_context_async(change_os_dir):
     assert (
         result.stdout
         == b"Running a command with application context in Async Mode - example_project\n"
+    )
+
+
+def test_running_example_project_1_works(cli_runner, change_os_dir):
+    with mock.patch.object(runserver, "uvicorn_run") as mock_run:
+        result = cli_runner.invoke_ellar_command(
+            ["--project", "example_project_1", "runserver"]
+        )
+        assert result.exit_code == 0
+
+        assert mock_run.called
+        assert mock_run.call_args.kwargs["factory"] is False
+        assert mock_run.call_args.args == ("example_project.server:application",)
+
+
+def test_running_example_project_2_works(cli_runner, change_os_dir):
+    with mock.patch.object(runserver, "uvicorn_run") as mock_run:
+        result = cli_runner.invoke_ellar_command(
+            ["--project", "example_project_2", "runserver"]
+        )
+        assert result.exit_code == 0
+
+        assert mock_run.called
+        assert mock_run.call_args.kwargs["factory"] is True
+        assert mock_run.call_args.args == ("example_project_2.server:bootstrap",)
+
+
+def test_running_example_project_3_fails(cli_runner, change_os_dir):
+    with mock.patch.object(runserver, "uvicorn_run") as mock_run:
+        result = cli_runner.invoke_ellar_command(
+            ["--project", "example_project_3", "runserver"]
+        )
+        assert result.exit_code == 1
+        assert (
+            result.output
+            == "Error: Coroutine Application Bootstrapping is not supported.\n"
+        )
+        assert mock_run.called is False
+
+
+def test_running_example_project_3_db_command_fails(cli_runner, change_os_dir):
+    result = cli_runner.invoke_ellar_command(
+        ["--project", "example_project_3", "db", "create-migration"]
+    )
+    assert result.exit_code == 1
+    assert (
+        result.output
+        == "Error: Coroutine Application Bootstrapping is not supported.\n"
     )

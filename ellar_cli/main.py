@@ -51,6 +51,8 @@ def app_cli(ctx: click.Context, project: str) -> None:
 
 
 app_cli.command(name="new")(new_command)
-app_cli.command(context_settings={"auto_envvar_prefix": "UVICORN"})(runserver)
+app_cli.command(
+    context_settings={"auto_envvar_prefix": "UVICORN"}, with_app_context=False
+)(runserver)
 app_cli.command(name="create-project")(create_project)
 app_cli.command(name="create-module")(create_module)
