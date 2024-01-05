@@ -3,7 +3,7 @@ Application Configurations
 Default Ellar Configurations are exposed here through `ConfigDefaultTypesMixin`
 Make changes and define your own configurations specific to your application
 
-export ELLAR_CONFIG_MODULE=example_project.config:DevelopmentConfig
+export ELLAR_CONFIG_MODULE=example_project_2.config:DevelopmentConfig
 """
 
 import typing as t
@@ -19,7 +19,7 @@ class BaseConfig(ConfigDefaultTypesMixin):
     DEBUG: bool = False
 
     DEFAULT_JSON_CLASS: t.Type[JSONResponse] = JSONResponse
-    SECRET_KEY: str = "ellar_0966647b-25b5-4e1a-8b2f-9fed5deec62b"
+    SECRET_KEY: str = "ellar_9b1375d6-5a08-47b2-9026-ba522bfbee8c"
 
     # injector auto_bind = True allows you to resolve types that are not registered on the container
     # For more info, read: https://injector.readthedocs.io/en/latest/index.html
@@ -64,5 +64,3 @@ class BaseConfig(ConfigDefaultTypesMixin):
 
 class DevelopmentConfig(BaseConfig):
     DEBUG: bool = True
-
-    APPLICATION_NAME: str = "example_project"

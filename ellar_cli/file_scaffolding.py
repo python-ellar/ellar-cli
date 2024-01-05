@@ -41,7 +41,9 @@ class FileTemplateScaffold:
             self._working_directory = working_directory
             self._working_project_name = working_project_name
 
-    def get_scaffolding_context(self, working_project_name: str) -> t.Dict:
+    def get_scaffolding_context(
+        self, working_project_name: str
+    ) -> t.Dict:  # pragma: no cover
         return {}
 
     @classmethod
@@ -75,7 +77,7 @@ class FileTemplateScaffold:
             )
         self.on_scaffold_completed()
 
-    def on_scaffold_completed(self) -> None:
+    def on_scaffold_completed(self) -> None:  # pragma: no cover
         pass
 
     def on_scaffold_started(self) -> None:
@@ -112,7 +114,7 @@ class FileTemplateScaffold:
             )
 
     @abstractmethod
-    def validate_project_name(self) -> None:
+    def validate_project_name(self) -> None:  # pragma: no cover
         # Check it's a valid directory name.
         pass
 

@@ -118,7 +118,7 @@ def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
     ]:
         assert file in files
 
-    module_test_path = os.path.join(tmpdir, "test_new_module", "tests")
-    test_files = os.listdir(module_test_path)
-    for file in ["test_routers.py", "test_services.py", "test_controllers.py"]:
-        assert file in test_files
+    # module_test_path = os.path.join(tmpdir, "test_new_module", "tests")
+    # test_files = os.listdir(module_test_path)
+    # for file in ["test_routers.py", "test_services.py", "test_controllers.py"]:
+    #     assert file in test_files

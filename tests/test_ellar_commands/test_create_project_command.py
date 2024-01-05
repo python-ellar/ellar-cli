@@ -78,7 +78,7 @@ def test_create_project_command_works(tmpdir, process_runner, write_empty_py_pro
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "ellar_project",
-        "application": "ellar_project.server:application",
+        "application": "ellar_project.server:bootstrap",
         "config": "ellar_project.config:DevelopmentConfig",
         "root_module": "ellar_project.root_module:ApplicationModule",
     }
@@ -100,7 +100,7 @@ def test_create_project_command_works_with_specific_directory(
     ellar_cli_service = EllarCLIService.import_project_meta()
     assert ellar_cli_service._meta.dict(by_alias=False) == {
         "project_name": "ellar_project",
-        "application": "another.me.ellar_project.server:application",
+        "application": "another.me.ellar_project.server:bootstrap",
         "config": "another.me.ellar_project.config:DevelopmentConfig",
         "root_module": "another.me.ellar_project.root_module:ApplicationModule",
     }

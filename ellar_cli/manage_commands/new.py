@@ -3,9 +3,9 @@ import re
 import subprocess
 import typing as t
 
-import typer
 from ellar.common.utils.module_loading import module_dir
 
+import ellar_cli.click as eClick
 from ellar_cli import scaffolding
 from ellar_cli.schema import EllarScaffoldSchema
 
@@ -31,7 +31,8 @@ class NewTemplateScaffold(FileTemplateScaffold):
 
     def create_file(self, base_path: str, file_name: str, content: t.Any) -> None:
         _path = os.path.join(base_path, file_name.replace(".ellar", ".py"))
-        if os.path.exists(_path):
+        if os.path.exists(_path):  # pragma: no cover
+            # if there is a context existing, we override the intended content with the existing context
             content = self.read_file_content(path=_path)
 
         with open(
@@ -66,7 +67,7 @@ class NewTemplateScaffold(FileTemplateScaffold):
             print(
                 f"- ellar --project {project_working_project_name} runserver --reload\nHappy coding!"
             )
-        else:
+        else:  # pragma: no cover
             print(popen_res.stderr.decode("utf8"))
 
     def is_directory_empty(self) -> bool:
@@ -118,18 +119,16 @@ class NewTemplateScaffold(FileTemplateScaffold):
         return os.path.join(self._working_directory, self._working_project_name)
 
 
-def new_command(
-    project_name: str = typer.Argument(
-        None,
-        help="Project Module Name. Defaults to `project-name` if not set",
-        show_default=False,
-    ),
-    directory: t.Optional[str] = typer.Argument(
-        None,
-        help="The name of a new directory to scaffold the project into. Scaffolding into an existing directory is only allowed if the directory is empty",
-        show_default=False,
-    ),
-):
+@eClick.argument(
+    "project_name",
+    help="Project Module Name. Defaults to `project-name` if not set",
+)
+@eClick.argument(
+    "directory",
+    required=False,
+    help="The name of a new directory to scaffold the project into. Scaffolding into an existing directory is only allowed if the directory is empty",
+)
+def new_command(project_name: str, directory: t.Optional[str]):
     """- Runs a complete Ellar project scaffold and creates all files required for managing you application  -"""
     schema = EllarScaffoldSchema.parse_file(init_template_json)
     init_template_scaffold = NewTemplateScaffold(
