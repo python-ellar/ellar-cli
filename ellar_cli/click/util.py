@@ -3,7 +3,7 @@ import typing as t
 from functools import update_wrapper
 
 import click
-from ellar.threading import run_with_sync_worker
+from ellar.threading import execute_coroutine_with_sync_worker
 
 from ellar_cli.constants import ELLAR_META, ELLAR_PROJECT_NAME
 from ellar_cli.service import EllarCLIService
@@ -22,7 +22,7 @@ def _async_run(future: t.Coroutine) -> t.Any:
         loop.stop()
         loop.close()
     else:
-        res = run_with_sync_worker(future)
+        res = execute_coroutine_with_sync_worker(future)
 
     return res
 
