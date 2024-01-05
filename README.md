@@ -13,7 +13,7 @@
 # Introduction
 Ellar-CLI is an abstracted tool for the Ellar web framework that helps in the standard project scaffolding and managing typer and click commands.
 
-Ellar CLI is build on [Typer](https://typer.tiangolo.com/) and works well with `click` command. 
+Ellar CLI is build on [Click](https://click.palletsprojects.com/en/8.1.x/)
 
 ## Installation
 if you have [ellar](https://github.com/python-ellar/ellar) install ready
