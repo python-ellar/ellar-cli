@@ -4,6 +4,7 @@ import os
 import sys
 import typing as t
 
+import click
 from ellar.app import App
 from ellar.app.context import ApplicationContext
 from ellar.common.constants import ELLAR_CONFIG_MODULE
@@ -297,16 +298,16 @@ class EllarCLIServiceWithPyProject(EllarCLIService):
             message = (
                 'Attribute "{attrs_str}" not found in python module "{module_file}".'
             )
-            raise Exception(
+            raise click.ClickException(
                 message.format(attrs_str=attrs_str, module_file=module.__file__)
             ) from attr_ex
         return instance
 
-    def import_configuration(self) -> t.Type[Config]:
+    def import_configuration(self) -> t.Type[Config]:  # pragma: no cover
         raise Exception("Not Available")
 
     def get_application_config(self) -> Config:
         return self.import_application().config
 
-    def import_root_module(self) -> t.Type[ModuleBase]:
+    def import_root_module(self) -> t.Type[ModuleBase]:  # pragma: no cover
         raise Exception("Not Available")

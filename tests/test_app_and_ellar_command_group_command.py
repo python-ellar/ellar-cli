@@ -1,23 +1,8 @@
 import importlib
-import os
 import subprocess
-import sys
-from pathlib import Path
 from unittest import mock
 
-import pytest
-
-sample_app_path = os.path.join(Path(__file__).parent, "sample_app")
 runserver = importlib.import_module("ellar_cli.manage_commands.runserver")
-
-
-@pytest.fixture()
-def change_os_dir():
-    sys.path.append(sample_app_path)
-    os.chdir(sample_app_path)
-    print(f"working director - {os.getcwd()}")
-    yield
-    sys.path.remove(sample_app_path)
 
 
 def test_ellar_command_group_works_for_default_project(change_os_dir):

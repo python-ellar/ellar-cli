@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 import pytest
 from ellar.app import App
@@ -10,6 +11,15 @@ from ellar_cli.service import (
     EllarPyProject,
 )
 from ellar_cli.service.pyproject import PY_PROJECT_TOML
+
+good_app_info = (
+    b"Usage: good_app.py [OPTIONS] COMMAND [ARGS]...\n\n  "
+    b"Ellar, ASGI Python Web framework\n\nOptions:\n "
+    b" --project TEXT  Run Specific Command on a specific project  [default:\n                 "
+    b" default]\n  -v, --version   Show the version and exit.\n  --help          "
+    b"Show this message and exit.\n\nCommands:\n  create-module  - Scaffolds Ellar Application Module -\n  "
+    b"runserver      - Starts Uvicorn Server -\n  working\n"
+)
 
 
 def test_import_project_meta_returns_default_when_py_project_is_none(tmp_path):
@@ -179,4 +189,32 @@ def test_version_works(write_empty_py_project, process_runner):
 
     assert "Ellar CLI Version:" in str(result.stdout) and "Ellar Version:" in str(
         result.stdout
+    )
+
+
+def test_apps_good_app_cli_works(change_os_dir):
+    result = subprocess.run(["python", "apps/good_app.py"], stdout=subprocess.PIPE)
+    assert result.returncode == 0
+    assert result.stdout == good_app_info
+
+
+def test_apps_bad_app_fails(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/bad_app.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert (
+        result.stderr
+        == b"Error: Coroutine Application Bootstrapping is not supported.\n"
+    )
+
+
+def test_apps_bad_app_2_fails(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/bad_app_2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert (
+        b'Error: Attribute "bootstrap_unknown" not found in python module'
+        in result.stderr
     )

@@ -1,6 +1,7 @@
 import os.path
 import subprocess
 import sys
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -9,6 +10,17 @@ from tomlkit import table
 from ellar_cli.service import EllarCLIService, EllarPyProject
 from ellar_cli.service.pyproject import PY_PROJECT_TOML
 from ellar_cli.testing import EllarCliRunner
+
+sample_app_path = os.path.join(Path(__file__).parent, "sample_app")
+
+
+@pytest.fixture()
+def change_os_dir():
+    sys.path.append(sample_app_path)
+    os.chdir(sample_app_path)
+    print(f"working director - {os.getcwd()}")
+    yield
+    sys.path.remove(sample_app_path)
 
 
 @pytest.fixture
