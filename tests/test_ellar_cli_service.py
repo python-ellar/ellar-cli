@@ -198,6 +198,34 @@ def test_apps_good_app_cli_works(change_os_dir):
     assert result.stdout == good_app_info
 
 
+def test_apps_good_app_working_command(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "working"], stdout=subprocess.PIPE
+    )
+    assert result.returncode == 0
+    assert result.stdout == b"Working\n"
+
+
+def test_apps_good_app_failing_commands(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "failing-1"], stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert result.stderr == b"Error: Not Available\n"
+
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "failing-2"], stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert result.stderr == b"Error: Not Available\n"
+
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "failing-3"], stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert result.stderr == b"Error: Not Available\n"
+
+
 def test_apps_bad_app_fails(change_os_dir):
     result = subprocess.run(
         ["python", "apps/bad_app.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE

@@ -214,7 +214,7 @@ class EllarCLIService:
     @_export_ellar_config_module
     def get_application_config(self) -> "Config":
         assert self._meta
-        if not self._store.config_instance:
+        if not self._store.config_instance:  # pragma: no cover
             self._store.config_instance = Config(
                 os.environ.get(ELLAR_CONFIG_MODULE, self._meta.config)
             )
@@ -302,11 +302,11 @@ class EllarCLIServiceWithPyProject(EllarCLIService):
             ) from attr_ex
         return instance
 
-    def import_configuration(self) -> t.Type[Config]:  # pragma: no cover
-        raise Exception("Not Available")
+    def import_configuration(self) -> t.Type[Config]:
+        raise EllarCLIException("Not Available")
 
     def get_application_config(self) -> Config:
         return self.import_application().config
 
-    def import_root_module(self) -> t.Type[ModuleBase]:  # pragma: no cover
-        raise Exception("Not Available")
+    def import_root_module(self) -> t.Type[ModuleBase]:
+        raise EllarCLIException("Not Available")
