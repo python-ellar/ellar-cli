@@ -14,7 +14,7 @@
 Ellar-CLI is an abstracted tool for the Ellar web framework
 that helps in the standard project scaffolding and other application commands.
 
-Ellar CLI is build on [Click](https://click.palletsprojects.com/en/8.1.x/)
+Ellar CLI is built on [Click](https://click.palletsprojects.com/en/8.1.x/)
 
 ## Installation
 if you have [ellar](https://github.com/python-ellar/ellar) install ready
