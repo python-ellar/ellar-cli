@@ -3,10 +3,10 @@ import typing as t
 import click
 from ellar.app import AppFactory
 from ellar.common.constants import MODULE_METADATA
-from ellar.core import ModuleSetup, reflector
+from ellar.core import ModuleBase, ModuleSetup, reflector
 
 from ellar_cli.constants import ELLAR_META
-from ellar_cli.service import EllarCLIService
+from ellar_cli.service import EllarCLIService, EllarCLIServiceWithPyProject
 
 from .command import Command
 from .util import with_app_context
@@ -45,29 +45,56 @@ class AppContextGroup(click.Group):
 class EllarCommandGroup(AppContextGroup):
     """Overrides AppContextGroup to add loading of Ellar Application registered commands in the modules"""
 
+    def __init__(
+        self, app_import_string: t.Optional[str] = None, **kwargs: t.Any
+    ) -> None:
+        super().__init__(**kwargs)
+        meta = None
+
+        if app_import_string:
+            meta = EllarCLIServiceWithPyProject(app_import_string=app_import_string)
+
+        self._cli_meta: t.Optional[EllarCLIServiceWithPyProject] = meta
+
     def _load_application_commands(self, ctx: click.Context) -> None:
         # get project option from cli
-        app_name = ctx.params.get("project")
+        module_configs: t.Any
+        if self._cli_meta:
+            application = self._cli_meta.import_application()
 
-        # loads project metadata from pyproject.toml
-        meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(
-            app_name
-        )
-        ctx.meta[ELLAR_META] = meta_
+            module_configs = (i for i in application.injector.get_modules().keys())
 
-        if meta_ and meta_.has_meta:
-            module_configs = AppFactory.get_all_modules(
-                ModuleSetup(meta_.import_root_module())
+            ctx.meta[ELLAR_META] = self._cli_meta
+        else:
+            module_configs = ()
+            app_name = ctx.params.get("project")
+
+            # loads project metadata from pyproject.toml
+            meta_: t.Optional[EllarCLIService] = EllarCLIService.import_project_meta(
+                app_name
             )
 
-            for module_config in module_configs:
-                click_commands = (
-                    reflector.get(MODULE_METADATA.COMMANDS, module_config.module) or []
-                )
+            ctx.meta[ELLAR_META] = meta_
 
-                for click_command in click_commands:
-                    if isinstance(click_command, click.Command):
-                        self.add_command(click_command, click_command.name)
+            if meta_ and meta_.has_meta:
+                module_configs = (
+                    module_config.module
+                    for module_config in AppFactory.get_all_modules(
+                        ModuleSetup(meta_.import_root_module())
+                    )
+                )
+        self._find_commands_from_modules(module_configs)
+
+    def _find_commands_from_modules(
+        self,
+        modules: t.Union[t.Sequence[ModuleBase], t.Iterator[ModuleBase], t.Generator],
+    ) -> None:
+        for module in modules:
+            click_commands = reflector.get(MODULE_METADATA.COMMANDS, module) or []
+
+            for click_command in click_commands:
+                if isinstance(click_command, click.Command):
+                    self.add_command(click_command, click_command.name)
 
     def get_command(
         self, ctx: click.Context, cmd_name: str

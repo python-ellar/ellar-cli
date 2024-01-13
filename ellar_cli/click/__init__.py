@@ -46,7 +46,7 @@ from click.utils import open_file as open_file
 from .argument import Argument
 from .command import Command
 from .group import AppContextGroup, EllarCommandGroup
-from .util import with_app_context
+from .util import run_as_async, with_app_context
 
 
 def argument(
@@ -89,6 +89,8 @@ def group(
 
 __all__ = [
     "argument",
+    "run_as_async",
+    "command",
     "Argument",
     "Option",
     "option",

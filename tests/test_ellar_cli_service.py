@@ -5,11 +5,11 @@ from ellar.app import App
 from ellar.core import ConfigDefaultTypesMixin, ModuleBase
 
 from ellar_cli.service import (
-    PY_PROJECT_TOML,
     EllarCLIException,
     EllarCLIService,
     EllarPyProject,
 )
+from ellar_cli.service.pyproject import PY_PROJECT_TOML
 
 
 def test_import_project_meta_returns_default_when_py_project_is_none(tmp_path):

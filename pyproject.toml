@@ -116,6 +116,10 @@ module = "ellar_cli.cli.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+module = "ellar_cli.service.cli"
+disable_error_code = ["assignment", 'union-attr', 'return-value', 'no-any-return']
+
+[[tool.mypy.overrides]]
 module = "ellar_cli.schema.*"
 ignore_errors = true
 

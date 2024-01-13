@@ -6,7 +6,8 @@ from uuid import uuid4
 import pytest
 from tomlkit import table
 
-from ellar_cli.service import PY_PROJECT_TOML, EllarCLIService, EllarPyProject
+from ellar_cli.service import EllarCLIService, EllarPyProject
+from ellar_cli.service.pyproject import PY_PROJECT_TOML
 from ellar_cli.testing import EllarCliRunner
 
 

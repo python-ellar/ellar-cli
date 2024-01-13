@@ -5,7 +5,6 @@ import typing as t
 from datetime import datetime
 
 from ellar import __version__ as ellar_version
-from ellar.app import current_config
 from ellar.common.utils.enums import create_enums_from_list
 from uvicorn import config as uvicorn_config
 from uvicorn import run as uvicorn_run
@@ -382,6 +381,7 @@ def runserver(
         )
 
     application_import_string = ellar_project_meta.project_meta.application
+    current_config = ellar_project_meta.get_application_config()
 
     log_config = current_config.LOGGING_CONFIG
     _log_level = current_config.LOG_LEVEL

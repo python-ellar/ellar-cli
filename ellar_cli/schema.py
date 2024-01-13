@@ -1,7 +1,20 @@
 import typing as t
 
+from ellar.app import App
+from ellar.common.compatible import AttributeDict
 from ellar.common.serializer import Serializer
+from ellar.core import ModuleBase
 from ellar.pydantic import Field
+
+
+class MetadataStore(AttributeDict):
+    app_instance: t.Optional[App]
+    config_instance: t.Optional[App]
+    is_app_reference_callable: bool
+    root_module: t.Type[ModuleBase]
+
+    def __missing__(self, name) -> None:
+        return None
 
 
 class EllarPyProjectSerializer(Serializer):

@@ -1,25 +1,23 @@
 import asyncio
 import functools
 import os
+import sys
 import typing as t
 
-from click import ClickException
 from ellar.app import App
 from ellar.app.context import ApplicationContext
 from ellar.common.constants import ELLAR_CONFIG_MODULE
-from ellar.common.utils.importer import import_from_string
+from ellar.common.utils.importer import import_from_string, module_import
 from ellar.core import Config, ModuleBase
 from tomlkit import dumps as tomlkit_dumps
 from tomlkit import parse as tomlkit_parse
-from tomlkit import table
 from tomlkit.items import Table
 
 from ellar_cli.constants import ELLAR_PY_PROJECT
-from ellar_cli.schema import EllarPyProjectSerializer
+from ellar_cli.schema import EllarPyProjectSerializer, MetadataStore
 
-PY_PROJECT_TOML = "pyproject.toml"
-ELLAR_DEFAULT_KEY = "default"
-ELLAR_PROJECTS_KEY = "projects"
+from .exceptions import EllarCLIException
+from .pyproject import PY_PROJECT_TOML, EllarPyProject
 
 
 def _export_ellar_config_module(func: t.Callable) -> t.Callable:
@@ -27,65 +25,19 @@ def _export_ellar_config_module(func: t.Callable) -> t.Callable:
 
     @functools.wraps(func)
     def _wrap(self: "EllarCLIService", *args: t.Any, **kwargs: t.Any) -> t.Any:
-        if os.environ.get(ELLAR_CONFIG_MODULE) is None and self.has_meta:
+        if (
+            os.environ.get(ELLAR_CONFIG_MODULE) is None
+            and self.has_meta
+            and self._meta.config != "null"
+        ):
             # export ELLAR_CONFIG_MODULE module
             os.environ.setdefault(
                 ELLAR_CONFIG_MODULE,
-                self._meta.config,  # type:ignore[union-attr]
+                self._meta.config,
             )
         return func(self, *args, **kwargs)
 
     return _wrap
-
-
-class EllarCLIException(ClickException):
-    pass
-
-
-class EllarPyProject:
-    def __init__(self, ellar: t.Optional[Table] = None) -> None:
-        self._ellar = ellar if ellar is not None else table()
-        self._projects = t.cast(
-            Table, self._ellar.setdefault(ELLAR_PROJECTS_KEY, table())
-        )
-        self._default_project = self._ellar.get(ELLAR_DEFAULT_KEY, None)
-
-    @classmethod
-    def get_or_create_ellar_py_project(
-        cls, py_project_table: Table
-    ) -> "EllarPyProject":
-        ellar_py_project_table = py_project_table.setdefault(ELLAR_PY_PROJECT, table())
-        return cls(ellar_py_project_table)
-
-    @property
-    def has_default_project(self) -> bool:
-        return self._ellar.get(ELLAR_DEFAULT_KEY, None) is not None
-
-    @property
-    def default_project(self) -> t.Optional[str]:
-        return self._ellar.get(ELLAR_DEFAULT_KEY) or None
-
-    @default_project.setter
-    def default_project(self, value: str) -> None:
-        self._ellar.update(default=value)
-
-    def get_projects(self) -> Table:
-        return self._projects
-
-    def get_project(self, project_name: str) -> Table:
-        return t.cast(Table, self._projects.get(project_name))
-
-    def get_or_create_project(self, project_name: str) -> Table:
-        project = self._projects.setdefault(project_name.lower(), table())
-        return t.cast(Table, project)
-
-    def has_project(self, project_name: t.Optional[str]) -> bool:
-        if not project_name:
-            return False
-        return project_name in self._projects
-
-    def get_root_node(self) -> Table:
-        return self._ellar
 
 
 class EllarCLIService:
@@ -101,7 +53,7 @@ class EllarCLIService:
         ellar_py_projects: t.Optional[EllarPyProject] = None,
     ) -> None:
         self._meta = meta
-        self._store: t.Dict[str, t.Any] = {}
+        self._store: MetadataStore = MetadataStore(is_app_reference_callable=False)
         self.py_project_path = py_project_path
         self.cwd = cwd
         self.app = app_name
@@ -201,7 +153,7 @@ class EllarCLIService:
         if os.path.exists(path):
             with open(path, mode="r") as fp:
                 table_content = tomlkit_parse(fp.read())
-                return table_content  # type:ignore[return-value]
+                return table_content
         return None
 
     @staticmethod
@@ -209,36 +161,47 @@ class EllarCLIService:
         with open(path, mode="w") as fw:
             fw.writelines(tomlkit_dumps(content))
 
-    @_export_ellar_config_module
-    def import_application(self) -> "App":
+    def _import_from_string(self) -> t.Union[App, t.Callable[..., App]]:
+        return import_from_string(self._meta.application)  # type:ignore[no-any-return]
+
+    def _import_and_validate_application(
+        self,
+    ) -> None:
         assert self._meta
-        if "App" not in self._store:
-            self._store["App"] = t.cast(App, import_from_string(self._meta.application))
+        app = self._import_from_string()
+        is_callable = not isinstance(app, App)
 
-            if not isinstance(self._store["App"], App):
-                # if its factory, we resolve the factory.
-                app_instance = self._store["App"]()
-
-                if isinstance(app_instance, t.Coroutine):
-                    raise EllarCLIException(
-                        "Coroutine Application Bootstrapping is not supported."
-                    )
-                self._store["App"] = app_instance
-
-        return self._store["App"]  # type:ignore[no-any-return]
-
-    def is_app_callable(self) -> bool:
-        assert self._meta
-
-        app = import_from_string(self._meta.application)
-        res = not isinstance(app, App)
-
-        if res and asyncio.iscoroutinefunction(app):
+        if is_callable and asyncio.iscoroutinefunction(app):
             raise EllarCLIException(
                 "Coroutine Application Bootstrapping is not supported."
             )
 
-        return res
+        if is_callable:
+            app = app()  # type:ignore[call-arg]
+
+            if not isinstance(app, App):
+                raise EllarCLIException(
+                    "Boostrap Function must return Instance of `ellar.app.App` type"
+                )
+
+        self._store.app_instance = app
+        self._store.is_app_reference_callable = is_callable
+        self._store.config_instance = app.config
+
+    @_export_ellar_config_module
+    def import_application(self) -> App:
+        assert self._meta
+        if not self._store.app_instance:
+            self._import_and_validate_application()
+
+        assert isinstance(self._store.app_instance, App)
+        return self._store.app_instance
+
+    def is_app_callable(self) -> bool:
+        if not self._store.is_app_reference_callable:
+            self._import_and_validate_application()
+
+        return self._store.is_app_reference_callable
 
     def import_configuration(self) -> t.Type["Config"]:
         assert self._meta
@@ -246,27 +209,104 @@ class EllarCLIService:
             self._store["Config"] = t.cast(
                 t.Type["Config"], import_from_string(self._meta.config)
             )
-        return self._store["Config"]  # type:ignore[no-any-return]
+        return self._store["Config"]
 
     @_export_ellar_config_module
     def get_application_config(self) -> "Config":
         assert self._meta
-        if "ConfigInstance" not in self._store:
-            self._store["ConfigInstance"] = Config(
+        if not self._store.config_instance:
+            self._store.config_instance = Config(
                 os.environ.get(ELLAR_CONFIG_MODULE, self._meta.config)
             )
-        return self._store["ConfigInstance"]  # type:ignore[no-any-return]
+        return self._store.config_instance
 
     @_export_ellar_config_module
     def import_root_module(self) -> t.Type["ModuleBase"]:
         assert self._meta
-        if "RootModule" not in self._store:
-            self._store["RootModule"] = t.cast(
+        if not self._store.root_module:
+            self._store.root_module = t.cast(
                 t.Type["ModuleBase"], import_from_string(self._meta.root_module)
             )
-        return self._store["RootModule"]  # type:ignore[no-any-return]
+        return self._store.root_module
 
     @_export_ellar_config_module
     def get_application_context(self) -> ApplicationContext:
         app = t.cast(App, self.import_application())
         return app.application_context()
+
+
+class EllarCLIServiceWithPyProject(EllarCLIService):
+    def __init__(self, *, app_import_string: str) -> None:
+        project_meta = EllarPyProjectSerializer.model_validate(
+            {
+                "project-name": "null",
+                "application": app_import_string,
+                "config": "null",
+                "root-module": "null",
+            },
+            from_attributes=True,
+        )
+        super().__init__(meta=project_meta, py_project_path="null", cwd=os.getcwd())
+        self.set_proper_sys_module_path()
+
+    def set_proper_sys_module_path(self) -> None:
+        assert self._meta
+        module_str, _, attrs_str = self._meta.application.partition(":")
+        module_path = module_str.replace(".", "/")
+
+        path = os.path.realpath(module_path)
+
+        if os.path.basename(path) == "__init__":
+            path = os.path.dirname(path)
+
+        module_name = []
+
+        # move up until outside package structure (no __init__.py)
+        while True:
+            path, name = os.path.split(path)
+            module_name.append(name)
+
+            if not os.path.exists(os.path.join(path, "__init__.py")):
+                break
+
+        if sys.path[0] != path:
+            sys.path.insert(0, path)
+
+    def _import_from_string(self) -> t.Any:
+        assert self._meta
+        module_str, _, attrs_str = self._meta.application.partition(":")
+
+        # start with __main__, in case infer module_str is the __main__ module
+        module = sys.modules.get("__main__")
+
+        if (
+            module
+            and module_str != "__main__"
+            and not module.__file__.endswith(f"{module_str}.py")
+        ):
+            module = sys.modules.get(module_str)
+
+        if not module:
+            module = module_import(module_str)
+
+        instance = module
+        try:
+            for attr_str in attrs_str.split("."):
+                instance = getattr(module, attr_str)
+        except AttributeError as attr_ex:
+            message = (
+                'Attribute "{attrs_str}" not found in python module "{module_file}".'
+            )
+            raise Exception(
+                message.format(attrs_str=attrs_str, module_file=module.__file__)
+            ) from attr_ex
+        return instance
+
+    def import_configuration(self) -> t.Type[Config]:
+        raise Exception("Not Available")
+
+    def get_application_config(self) -> Config:
+        return self.import_application().config
+
+    def import_root_module(self) -> t.Type[ModuleBase]:
+        raise Exception("Not Available")

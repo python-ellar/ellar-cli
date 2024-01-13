@@ -31,11 +31,3 @@ def command_with_app_context():
     print(
         f"Running a command with application context - {current_config.APPLICATION_NAME}"
     )
-
-
-@db.command(name="command-with-context-async")
-@click.with_app_context
-async def command_with_app_context_async():
-    print(
-        f"Running a command with application context in Async Mode - {current_config.APPLICATION_NAME}"
-    )

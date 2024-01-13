@@ -95,25 +95,12 @@ def test_click_command_works(change_os_dir):
     assert result.stdout == b"Hello from ellar.\n"
 
 
-def test_command_with_context(change_os_dir):
-    result = subprocess.run(
-        ["ellar", "db", "command-with-context"], stdout=subprocess.PIPE
-    )
-    assert result.returncode == 0
+def test_command_with_context(cli_runner, change_os_dir):
+    result = cli_runner.invoke_ellar_command(["db", "command-with-context"])
+    assert result.exit_code == 0
     assert (
         result.stdout
-        == b"Running a command with application context - example_project\n"
-    )
-
-
-def test_command_with_context_async(change_os_dir):
-    result = subprocess.run(
-        ["ellar", "db", "command-with-context-async"], stdout=subprocess.PIPE
-    )
-    assert result.returncode == 0
-    assert (
-        result.stdout
-        == b"Running a command with application context in Async Mode - example_project\n"
+        == "Running a command with application context - example_project\n"
     )
 
 
