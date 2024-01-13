@@ -1,23 +1,8 @@
 import importlib
-import os
 import subprocess
-import sys
-from pathlib import Path
 from unittest import mock
 
-import pytest
-
-sample_app_path = os.path.join(Path(__file__).parent, "sample_app")
 runserver = importlib.import_module("ellar_cli.manage_commands.runserver")
-
-
-@pytest.fixture()
-def change_os_dir():
-    sys.path.append(sample_app_path)
-    os.chdir(sample_app_path)
-    print(f"working director - {os.getcwd()}")
-    yield
-    sys.path.remove(sample_app_path)
 
 
 def test_ellar_command_group_works_for_default_project(change_os_dir):
@@ -95,25 +80,12 @@ def test_click_command_works(change_os_dir):
     assert result.stdout == b"Hello from ellar.\n"
 
 
-def test_command_with_context(change_os_dir):
-    result = subprocess.run(
-        ["ellar", "db", "command-with-context"], stdout=subprocess.PIPE
-    )
-    assert result.returncode == 0
+def test_command_with_context(cli_runner, change_os_dir):
+    result = cli_runner.invoke_ellar_command(["db", "command-with-context"])
+    assert result.exit_code == 0
     assert (
         result.stdout
-        == b"Running a command with application context - example_project\n"
-    )
-
-
-def test_command_with_context_async(change_os_dir):
-    result = subprocess.run(
-        ["ellar", "db", "command-with-context-async"], stdout=subprocess.PIPE
-    )
-    assert result.returncode == 0
-    assert (
-        result.stdout
-        == b"Running a command with application context in Async Mode - example_project\n"
+        == "Running a command with application context - example_project\n"
     )
 
 

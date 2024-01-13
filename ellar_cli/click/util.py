@@ -1,62 +1,55 @@
 import asyncio
+import functools
 import typing as t
 from functools import update_wrapper
 
 import click
-from ellar.threading import execute_coroutine_with_sync_worker
+from ellar.threading.sync_worker import (
+    execute_async_context_manager_with_sync_worker,
+    execute_coroutine_with_sync_worker,
+)
 
 from ellar_cli.constants import ELLAR_META
 from ellar_cli.service import EllarCLIService
 
 
-def _async_run(future: t.Coroutine) -> t.Any:
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:  # no event loop running:
-        loop = asyncio.new_event_loop()
-
-    if not loop.is_running():
-        try:
-            res = loop.run_until_complete(loop.create_task(future))
-            loop.run_until_complete(loop.shutdown_asyncgens())
-        except Exception as e:
-            raise e
-        finally:
-            loop.stop()
-            loop.close()
-    else:
-        res = execute_coroutine_with_sync_worker(future)
-
-    return res
-
-
 def with_app_context(f: t.Callable) -> t.Any:
     """
     Wraps a callback so that it's guaranteed to be executed with application context.
-    Also, wrap commands can be a coroutine.
     """
-
-    async def _run_with_application_context(
-        meta_: t.Optional[EllarCLIService], *args: t.Any, **kwargs: t.Any
-    ) -> t.Any:
-        if meta_ and meta_.has_meta:
-            async with meta_.get_application_context():
-                res = f(*args, **kwargs)
-                if isinstance(res, t.Coroutine):
-                    return await res
-                return res
-
-        res = f(*args, **kwargs)
-        if isinstance(res, t.Coroutine):
-            return await res
 
     @click.pass_context
     def decorator(__ctx: click.Context, *args: t.Any, **kwargs: t.Any) -> t.Any:
-        meta_ = __ctx.meta.get(ELLAR_META)
+        meta_: t.Optional[EllarCLIService] = __ctx.meta.get(ELLAR_META)
 
-        def _get_command_args(*ar: t.Any, **kw: t.Any) -> t.Any:
-            return _async_run(_run_with_application_context(meta_, *ar, **kw))
+        if meta_ and meta_.has_meta:
+            __ctx.with_resource(
+                execute_async_context_manager_with_sync_worker(
+                    meta_.get_application_context()
+                )
+            )
 
-        return __ctx.invoke(update_wrapper(_get_command_args, f), *args, **kwargs)
+        return __ctx.invoke(f, *args, **kwargs)
 
     return update_wrapper(decorator, f)
+
+
+def run_as_async(f: t.Callable) -> t.Callable:
+    """
+    Runs async click commands
+
+    eg:
+
+    @click.command()
+    @click.argument('name')
+    @click.run_as_async
+    async def print_name(name: str):
+        click.echo(f'Hello {name}, this is an async command.')
+    """
+    assert asyncio.iscoroutinefunction(f), "Decorated function must be Coroutine"
+
+    @functools.wraps(f)
+    def _decorator(*args: t.Any, **kw: t.Any) -> t.Any:
+        return execute_coroutine_with_sync_worker(f(*args, **kw))
+
+    return _decorator

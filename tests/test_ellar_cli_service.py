@@ -1,14 +1,25 @@
 import os
+import subprocess
 
 import pytest
 from ellar.app import App
 from ellar.core import ConfigDefaultTypesMixin, ModuleBase
 
 from ellar_cli.service import (
-    PY_PROJECT_TOML,
     EllarCLIException,
     EllarCLIService,
     EllarPyProject,
+)
+from ellar_cli.service.pyproject import PY_PROJECT_TOML
+
+good_app_info = (
+    b"Usage: good_app.py [OPTIONS] COMMAND [ARGS]...\n\n  "
+    b"Ellar, ASGI Python Web framework\n\nOptions:\n  --project TEXT  "
+    b"Run Specific Command on a specific project  [default:\n                  "
+    b"default]\n  -v, --version   Show the version and exit.\n  --help          "
+    b"Show this message and exit.\n\nCommands:\n  create-module  - Scaffolds Ellar Application Module -\n  "
+    b"failing-1\n  failing-2\n  failing-3\n  runserver      - "
+    b"Starts Uvicorn Server -\n  working\n"
 )
 
 
@@ -179,4 +190,71 @@ def test_version_works(write_empty_py_project, process_runner):
 
     assert "Ellar CLI Version:" in str(result.stdout) and "Ellar Version:" in str(
         result.stdout
+    )
+
+
+def test_apps_good_app_cli_works(change_os_dir):
+    result = subprocess.run(["python", "apps/good_app.py"], stdout=subprocess.PIPE)
+    assert result.returncode == 0
+    assert result.stdout == good_app_info
+
+
+def test_apps_good_app_working_command(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "working"], stdout=subprocess.PIPE
+    )
+    assert result.returncode == 0
+    assert result.stdout == b"Working\n"
+
+
+def test_apps_good_app_failing_commands(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "failing-1"], stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert result.stderr == b"Error: Not Available\n"
+
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "failing-2"], stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert result.stderr == b"Error: Not Available\n"
+
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "failing-3"], stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert result.stderr == b"Error: Not Available\n"
+
+
+def test_apps_bad_app_fails(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/bad_app.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert (
+        result.stderr
+        == b"Error: Coroutine Application Bootstrapping is not supported.\n"
+    )
+
+
+def test_apps_bad_app_2_fails(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/bad_app_2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert (
+        b'Error: Attribute "bootstrap_unknown" not found in python module'
+        in result.stderr
+    )
+
+
+def test_apps_bad_app_3_fails(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/bad_app_3.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert (
+        result.stderr
+        == b"Error: Boostrap Function must return Instance of `ellar.app.App` type\n"
     )
