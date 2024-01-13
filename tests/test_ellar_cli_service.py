@@ -14,11 +14,12 @@ from ellar_cli.service.pyproject import PY_PROJECT_TOML
 
 good_app_info = (
     b"Usage: good_app.py [OPTIONS] COMMAND [ARGS]...\n\n  "
-    b"Ellar, ASGI Python Web framework\n\nOptions:\n "
-    b" --project TEXT  Run Specific Command on a specific project  [default:\n                 "
-    b" default]\n  -v, --version   Show the version and exit.\n  --help          "
+    b"Ellar, ASGI Python Web framework\n\nOptions:\n  --project TEXT  "
+    b"Run Specific Command on a specific project  [default:\n                  "
+    b"default]\n  -v, --version   Show the version and exit.\n  --help          "
     b"Show this message and exit.\n\nCommands:\n  create-module  - Scaffolds Ellar Application Module -\n  "
-    b"runserver      - Starts Uvicorn Server -\n  working\n"
+    b"failing-1\n  failing-2\n  failing-3\n  runserver      - "
+    b"Starts Uvicorn Server -\n  working\n"
 )
 
 
