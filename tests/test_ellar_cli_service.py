@@ -218,3 +218,14 @@ def test_apps_bad_app_2_fails(change_os_dir):
         b'Error: Attribute "bootstrap_unknown" not found in python module'
         in result.stderr
     )
+
+
+def test_apps_bad_app_3_fails(change_os_dir):
+    result = subprocess.run(
+        ["python", "apps/bad_app_3.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    assert result.returncode == 1
+    assert (
+        result.stderr
+        == b"Error: Boostrap Function must return Instance of `ellar.app.App` type\n"
+    )
