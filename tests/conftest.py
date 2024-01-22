@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from ellar.common.constants import ELLAR_CONFIG_MODULE
 from tomlkit import table
 
 from ellar_cli.service import EllarCLIService, EllarPyProject
@@ -18,6 +19,7 @@ sample_app_path = os.path.join(Path(__file__).parent, "sample_app")
 def change_os_dir():
     sys.path.append(sample_app_path)
     os.chdir(sample_app_path)
+    os.environ.pop(ELLAR_CONFIG_MODULE, None)
     print(f"working director - {os.getcwd()}")
     yield
     sys.path.remove(sample_app_path)

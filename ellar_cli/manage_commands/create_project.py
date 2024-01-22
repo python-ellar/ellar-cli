@@ -28,6 +28,7 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
         ellar_cli_service: EllarCLIService,
         working_project_name: str,
         working_directory: str,
+        plain: bool,
         **kwargs: t.Any,
     ) -> None:
         super().__init__(
@@ -35,6 +36,7 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
             working_project_name=working_project_name,
             working_directory=working_directory,
         )
+        self._plain = plain
         self.ellar_cli_service = ellar_cli_service
         self._working_project_name = working_project_name
         if self._specified_directory:
@@ -90,15 +92,18 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
 
     def on_scaffold_completed(self) -> None:
         _working_project_name = self._working_project_name
-
-        self.ellar_cli_service.create_ellar_project_meta(
-            project_name=_working_project_name, prefix=self.prefix
-        )
-        print(
-            f"`{self._working_project_name}` project scaffold completed. To start your server, run the command below"
-        )
-        print(f"ellar --project {self._working_project_name} runserver --reload")
-        print("Happy coding!")
+        if not self._plain:
+            self.ellar_cli_service.create_ellar_project_meta(
+                project_name=_working_project_name, prefix=self.prefix
+            )
+            print(
+                f"`{self._working_project_name}` project scaffold completed. To start your server, run the command below"
+            )
+            print(f"ellar --project {self._working_project_name} runserver --reload")
+            print("Happy coding!")
+        else:
+            print(f"`{self._working_project_name}` project scaffold completed.")
+            print("Happy coding!")
 
 
 @eClick.argument("project_name", help="Project Name")
@@ -107,19 +112,23 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
     help="The name of a new directory to scaffold the project into.",
     required=False,
 )
+@eClick.option(
+    "--plain",
+    is_flag=True,
+    default=False,
+    help="Create a new without including `pyproject.toml`.",
+)
 @eClick.pass_context
 def create_project(
-    ctx: eClick.Context,
-    project_name: str,
-    directory: t.Optional[str],
+    ctx: eClick.Context, project_name: str, directory: t.Optional[str], plain: bool
 ):
     """- Scaffolds Ellar Application -"""
 
     ellar_project_meta = t.cast(t.Optional[EllarCLIService], ctx.meta.get(ELLAR_META))
-    if not ellar_project_meta:
+    if not ellar_project_meta and not plain:
         raise EllarCLIException("No pyproject.toml file found.")
 
-    if ellar_project_meta.ellar_py_projects.has_project(project_name):
+    if not plain and ellar_project_meta.ellar_py_projects.has_project(project_name):
         raise EllarCLIException("Ellar Project already exist.")
 
     schema = EllarScaffoldSchema.parse_file(project_template_json)
@@ -130,5 +139,6 @@ def create_project(
         ellar_cli_service=ellar_project_meta,
         specified_directory=directory,
         working_project_name=project_name.lower(),
+        plain=plain,
     )
     project_template_scaffold.scaffold()

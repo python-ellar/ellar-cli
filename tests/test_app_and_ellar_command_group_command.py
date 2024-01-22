@@ -135,3 +135,12 @@ def test_running_example_project_3_db_command_fails(cli_runner, change_os_dir):
         result.output
         == "Error: Coroutine Application Bootstrapping is not supported.\n"
     )
+
+
+def test_running_plain_project_db_command(process_runner, change_os_dir):
+    result = process_runner(["python", "plain_project/manage.py", "plain-project"])
+    assert result.returncode == 0
+    assert (
+        result.stdout
+        == b"Plain Project Command works. Executed within application context\n"
+    )

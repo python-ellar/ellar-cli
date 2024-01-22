@@ -25,6 +25,21 @@ def test_new_command_works(tmpdir, process_runner):
     }
 
 
+def test_new_command_with_plain_option_works(tmpdir, process_runner):
+    result = process_runner(["ellar", "new", "ellar-project-new", "--plain"])
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.decode("utf8") == (
+        "`ellar_project_new` project created successfully.\n"
+        "- cd ellar-project-new\n"
+        "To start your server, run the command below\n"
+        "- python manage.py runserver --reload\n"
+        "Happy coding!\n"
+    )
+    os.chdir(os.path.join(tmpdir, "ellar-project-new"))
+    ellar_cli_service = EllarCLIService.import_project_meta()
+    assert ellar_cli_service is None
+
+
 def test_new_command_works_with_specific_directory_case_1(tmpdir, process_runner):
     result = process_runner(["ellar", "new", "ellar-project-new", "Another/me"])
     assert result.returncode == 0, result.stderr
