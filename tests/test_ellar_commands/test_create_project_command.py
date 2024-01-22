@@ -12,6 +12,17 @@ def test_create_project_fails_for_py_project_none(cli_runner):
     assert result.output == "Error: No pyproject.toml file found.\n"
 
 
+def test_create_project_without_py_project(cli_runner):
+    result = cli_runner.invoke_ellar_command(
+        ["create-project", "testing_new_project", "--plain"]
+    )
+    assert result.exit_code == 0
+    assert (
+        result.output
+        == "`testing_new_project` project scaffold completed.\nHappy coding!\n"
+    )
+
+
 def test_create_project_fails_for_existing_project_name(
     cli_runner, write_empty_py_project, tmpdir
 ):
