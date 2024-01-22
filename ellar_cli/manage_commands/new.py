@@ -16,18 +16,21 @@ __all__ = ["new_command"]
 
 
 conf_module_dir = module_dir(scaffolding)
-root_scaffold_template_path = os.path.join(conf_module_dir, "new_template")
-init_template_json = os.path.join(root_scaffold_template_path, "setup.json")
+new_template_template_path = os.path.join(conf_module_dir, "new_template")
+new_manage_template_template_path = os.path.join(conf_module_dir, "new_manage_template")
 
 
 class NewTemplateScaffold(FileTemplateScaffold):
     unwanted_chars = "".join(["-", ";", "!", "*", ":", " "])
 
-    def __init__(self, project_name: str = None, **kwargs: t.Any) -> None:
+    def __init__(
+        self, project_name: str = None, pyproject_enabled: bool = True, **kwargs: t.Any
+    ) -> None:
         super(NewTemplateScaffold, self).__init__(
             working_project_name=project_name, **kwargs
         )
         self._project_name = project_name
+        self._pyproject_enabled = pyproject_enabled
 
     def create_file(self, base_path: str, file_name: str, content: t.Any) -> None:
         _path = os.path.join(base_path, file_name.replace(".ellar", ".py"))
@@ -42,8 +45,12 @@ class NewTemplateScaffold(FileTemplateScaffold):
             fw.writelines(refined_content)
 
     def on_scaffold_completed(self) -> None:
+        args = ["ellar", "create-project", self.get_project_name()]
+        if self._pyproject_enabled:
+            args.append("--plain")
+
         popen_res = subprocess.run(
-            ["ellar", "create-project", self.get_project_name()],
+            args,
             cwd=self.get_project_cwd(),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -64,9 +71,13 @@ class NewTemplateScaffold(FileTemplateScaffold):
                 f"{log_1}"
             )
             print("To start your server, run the command below")
-            print(
-                f"- ellar --project {project_working_project_name} runserver --reload\nHappy coding!"
-            )
+            if self._pyproject_enabled:
+                print("- python manage.py runserver --reload\nHappy coding!")
+            else:
+                print(
+                    f"- ellar --project {project_working_project_name} runserver --reload\nHappy coding!"
+                )
+
         else:  # pragma: no cover
             print(popen_res.stderr.decode("utf8"))
 
@@ -128,8 +139,21 @@ class NewTemplateScaffold(FileTemplateScaffold):
     required=False,
     help="The name of a new directory to scaffold the project into. Scaffolding into an existing directory is only allowed if the directory is empty",
 )
-def new_command(project_name: str, directory: t.Optional[str]):
+@eClick.option(
+    "--plain",
+    is_flag=True,
+    default=False,
+    help="Create a new without including `pyproject.toml`.",
+)
+def new_command(project_name: str, directory: t.Optional[str], plain: bool):
     """- Runs a complete Ellar project scaffold and creates all files required for managing you application  -"""
+    root_scaffold_template_path = new_template_template_path
+    init_template_json = os.path.join(root_scaffold_template_path, "setup.json")
+
+    if plain:
+        root_scaffold_template_path = new_manage_template_template_path
+        init_template_json = os.path.join(root_scaffold_template_path, "setup.json")
+
     schema = EllarScaffoldSchema.parse_file(init_template_json)
     init_template_scaffold = NewTemplateScaffold(
         schema=schema,
@@ -137,5 +161,6 @@ def new_command(project_name: str, directory: t.Optional[str]):
         scaffold_ellar_template_root_path=root_scaffold_template_path,
         project_name=project_name,
         specified_directory=directory,
+        pyproject_enabled=plain,
     )
     init_template_scaffold.scaffold()
