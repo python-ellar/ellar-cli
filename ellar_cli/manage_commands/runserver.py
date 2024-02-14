@@ -5,7 +5,7 @@ import typing as t
 from datetime import datetime
 
 from ellar import __version__ as ellar_version
-from ellar.common.utils.enums import create_enums_from_list
+from ellar.utils.enums import create_enums_from_list
 from uvicorn import config as uvicorn_config
 from uvicorn import run as uvicorn_run
 from uvicorn.config import (

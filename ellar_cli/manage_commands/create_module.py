@@ -4,7 +4,7 @@ import typing as t
 from importlib import import_module
 from pathlib import Path
 
-from ellar.common.utils.module_loading import module_dir
+from ellar.utils.module_loading import module_dir
 
 import ellar_cli.click as eClick
 from ellar_cli import scaffolding
