@@ -7,8 +7,8 @@ import typing as t
 from ellar.app import App
 from ellar.app.context import ApplicationContext
 from ellar.common.constants import ELLAR_CONFIG_MODULE
-from ellar.common.utils.importer import import_from_string, module_import
 from ellar.core import Config, ModuleBase
+from ellar.utils.importer import import_from_string, module_import
 from tomlkit import dumps as tomlkit_dumps
 from tomlkit import parse as tomlkit_parse
 from tomlkit.items import Table

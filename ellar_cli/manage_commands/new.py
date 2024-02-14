@@ -3,7 +3,7 @@ import re
 import subprocess
 import typing as t
 
-from ellar.common.utils.module_loading import module_dir
+from ellar.utils.module_loading import module_dir
 
 import ellar_cli.click as eClick
 from ellar_cli import scaffolding

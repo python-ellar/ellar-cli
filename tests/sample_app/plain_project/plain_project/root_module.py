@@ -1,4 +1,4 @@
-from ellar.app import current_app
+from ellar.app import current_injector
 from ellar.common import (
     IExecutionContext,
     JSONResponse,
@@ -16,7 +16,7 @@ import ellar_cli.click as click
 @click.with_app_context
 def plain_project():
     """Project 2 Custom Command"""
-    assert isinstance(current_app.config, Config)
+    assert isinstance(current_injector.get(Config), Config)
     print("Plain Project Command works. Executed within application context")
 
 

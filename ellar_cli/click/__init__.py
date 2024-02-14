@@ -42,11 +42,12 @@ from click.utils import get_app_dir as get_app_dir
 from click.utils import get_binary_stream as get_binary_stream
 from click.utils import get_text_stream as get_text_stream
 from click.utils import open_file as open_file
+from ellar.threading import run_as_async
 
 from .argument import Argument
 from .command import Command
 from .group import AppContextGroup, EllarCommandGroup
-from .util import run_as_async, with_app_context
+from .util import with_app_context
 
 
 def argument(
