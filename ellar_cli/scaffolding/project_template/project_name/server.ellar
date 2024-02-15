@@ -26,9 +26,9 @@ def bootstrap() -> App:
     #
     # document = document_builder.build_document(application)
     # module = OpenAPIDocumentModule.setup(
+    #    app=application,
     #    document=document,
     #    docs_ui=SwaggerUI(),
     #    guards=[]
     # )
-    # application.install_module(module)
     return application
