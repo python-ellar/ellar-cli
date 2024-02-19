@@ -9,7 +9,7 @@
     routers=(routerA, routerB)
     statics='statics',
     template='template_folder',
-    # base_directory -> default is the `{{module_name}}` folder
+    base_directory=`default is the `{{module_name}}` folder`
 )
 class MyModule(ModuleBase):
     def register_providers(self, container: Container) -> None:
