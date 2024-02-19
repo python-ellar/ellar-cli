@@ -2,7 +2,7 @@
 Define endpoints routes in python function fashion
 example:
 
-my_router = ModuleRouter("/cats", tag="Cats", description="Cats Resource description")
+my_router = ModuleRouter("/cats", name="Cats")
 
 @my_router.get('/')
 def index(request: Request):
@@ -10,4 +10,3 @@ def index(request: Request):
 """
 
 from ellar.common import ModuleRouter
-

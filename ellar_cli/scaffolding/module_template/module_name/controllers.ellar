@@ -2,7 +2,7 @@
 Define endpoints routes in python class-based fashion
 example:
 
-@Controller("/dogs", tag="Dogs", description="Dogs Resources")
+@Controller("/dogs", name="Dogs")
 class MyController(ControllerBase):
     @get('/')
     def index(self):
