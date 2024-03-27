@@ -11,6 +11,7 @@ from ellar.core import Config, ModuleBase
 from ellar.utils.importer import import_from_string, module_import
 from tomlkit import dumps as tomlkit_dumps
 from tomlkit import parse as tomlkit_parse
+from tomlkit import table
 from tomlkit.items import Table
 
 from ellar_cli.constants import ELLAR_PY_PROJECT
@@ -83,13 +84,14 @@ class EllarCLIService:
 
         py_project_file_path = os.path.join(cwd, PY_PROJECT_TOML)
         if os.path.exists(py_project_file_path):
-            pyproject_table = EllarCLIService.read_py_project(py_project_file_path)
+            pyproject_table = (
+                EllarCLIService.read_py_project(py_project_file_path) or table()
+            )
             _ellar_pyproject_serializer: t.Optional[EllarPyProjectSerializer] = None
+            tools = pyproject_table.get("tool", {})
 
-            if pyproject_table and ELLAR_PY_PROJECT in pyproject_table:
-                ellar_py_projects = EllarPyProject(
-                    pyproject_table.get(ELLAR_PY_PROJECT)
-                )
+            if ELLAR_PY_PROJECT in tools:
+                ellar_py_projects = EllarPyProject(tools.get(ELLAR_PY_PROJECT))
                 if ellar_py_projects.has_project(
                     project
                 ) or ellar_py_projects.has_project(ellar_py_projects.default_project):

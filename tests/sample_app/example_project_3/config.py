@@ -57,9 +57,9 @@ class BaseConfig(ConfigDefaultTypesMixin):
     ] = {}
 
     # Object Serializer custom encoders
-    SERIALIZER_CUSTOM_ENCODER: t.Dict[
-        t.Any, t.Callable[[t.Any], t.Any]
-    ] = encoders_by_type
+    SERIALIZER_CUSTOM_ENCODER: t.Dict[t.Any, t.Callable[[t.Any], t.Any]] = (
+        encoders_by_type
+    )
 
 
 class DevelopmentConfig(BaseConfig):
