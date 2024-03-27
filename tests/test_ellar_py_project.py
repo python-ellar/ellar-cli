@@ -8,12 +8,13 @@ from ellar_cli.service import EllarPyProject
 def test_get_or_create_ellar_py_project(mock_py_project_table):
     assert ELLAR_PY_PROJECT not in mock_py_project_table
     EllarPyProject.get_or_create_ellar_py_project(mock_py_project_table)
-    assert ELLAR_PY_PROJECT in mock_py_project_table
+    assert ELLAR_PY_PROJECT in mock_py_project_table["tool"]
 
     new_py_project_table = table()
+    tool = new_py_project_table.setdefault("tool", table())
     ellar = table()
     ellar.update({"not_a_new_instance": True})
-    new_py_project_table.add(ELLAR_PY_PROJECT, ellar)
+    tool.add(ELLAR_PY_PROJECT, ellar)
 
     ellar_py_project = EllarPyProject.get_or_create_ellar_py_project(
         new_py_project_table
@@ -59,6 +60,6 @@ def test_get_root_node(mock_py_project_table):
     ellar_py_project = EllarPyProject.get_or_create_ellar_py_project(
         mock_py_project_table
     )
-    assert ellar_py_project.get_root_node() is mock_py_project_table.get(
+    assert ellar_py_project.get_root_node() is mock_py_project_table["tool"].get(
         ELLAR_PY_PROJECT
     )

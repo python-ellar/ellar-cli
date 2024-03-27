@@ -1,18 +1,17 @@
-[ellar]
+[tool.ellar]
 default = "example_project"
-[ellar.projects]
-[ellar.projects.example_project]
+[tool.ellar.projects.example_project]
 project-name = "example_project"
 application = "example_project.server:application"
 config = "example_project.config:DevelopmentConfig"
 root-module = "example_project.root_module:ApplicationModule"
 
-[ellar.projects.example_project_2]
+[tool.ellar.projects.example_project_2]
 project-name = "example_project_2"
 application = "example_project_2.server:bootstrap"
 config = "example_project_2.config:DevelopmentConfig"
 root-module = "example_project_2.root_module:ApplicationModule"
-[ellar.projects.example_project_3]
+[tool.ellar.projects.example_project_3]
 project-name = "example_project_3"
 application = "example_project_3.server:bootstrap"
 config = "example_project_3.config:DevelopmentConfig"

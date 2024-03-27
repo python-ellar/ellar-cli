@@ -22,7 +22,9 @@ class EllarPyProject:
     def get_or_create_ellar_py_project(
         cls, py_project_table: Table
     ) -> "EllarPyProject":
-        ellar_py_project_table = py_project_table.setdefault(ELLAR_PY_PROJECT, table())
+        ellar_py_project_table = py_project_table.setdefault(
+            "tool", table()
+        ).setdefault(ELLAR_PY_PROJECT, table())
         return cls(ellar_py_project_table)
 
     @property
