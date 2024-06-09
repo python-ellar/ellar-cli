@@ -8,10 +8,9 @@ from ellar.utils.module_loading import module_dir
 
 import ellar_cli.click as eClick
 from ellar_cli import scaffolding
+from ellar_cli.file_scaffolding import FileTemplateScaffold
 from ellar_cli.schema import EllarScaffoldSchema
-
-from ..file_scaffolding import FileTemplateScaffold
-from ..service import EllarCLIException
+from ellar_cli.service import EllarCLIException
 
 __all__ = ["create_module"]
 
