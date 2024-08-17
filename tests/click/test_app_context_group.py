@@ -1,5 +1,4 @@
-from ellar.app import current_injector
-from ellar.core import Config
+from ellar.core import Config, current_injector
 
 from ellar_cli.click.group import AppContextGroup
 
@@ -11,7 +10,7 @@ def app_group():
     pass
 
 
-@app_group.command(with_app_context=False)
+@app_group.command(with_injector_context=False)
 def invoke_without_app_context():
     assert current_injector.get(Config)
     print("Application Context wont be initialized.")

@@ -21,13 +21,12 @@ def test_create_module_with_directory_case_1(process_runner, tmpdir):
     files = os.listdir(module_path)
 
     for file in [
-        "module.py",
-        "tests",
-        "routers.py",
         "services.py",
         "controllers.py",
-        "schemas.py",
+        "tests",
         "__init__.py",
+        "schemas.py",
+        "module.py",
     ]:
         assert file in files
 
@@ -42,13 +41,12 @@ def test_create_module_with_directory_case_2(process_runner, tmpdir):
     files = os.listdir(tmpdir / "test_new_module")
 
     for file in [
-        "module.py",
-        "tests",
-        "routers.py",
         "services.py",
         "controllers.py",
-        "schemas.py",
+        "tests",
         "__init__.py",
+        "schemas.py",
+        "module.py",
     ]:
         assert file in files
 
@@ -108,13 +106,12 @@ def test_create_module_works(tmpdir, process_runner, write_empty_py_project):
     files = os.listdir(module_path)
 
     for file in [
-        "module.py",
-        "tests",
-        "routers.py",
         "services.py",
         "controllers.py",
-        "schemas.py",
+        "tests",
         "__init__.py",
+        "schemas.py",
+        "module.py",
     ]:
         assert file in files
 

@@ -5,9 +5,9 @@ import sys
 import typing as t
 
 from ellar.app import App
-from ellar.app.context import ApplicationContext
 from ellar.common.constants import ELLAR_CONFIG_MODULE
-from ellar.core import Config, ModuleBase
+from ellar.core import Config, ModuleBase, injector_context
+from ellar.di import EllarInjector
 from ellar.utils.importer import import_from_string, module_import
 from tomlkit import dumps as tomlkit_dumps
 from tomlkit import parse as tomlkit_parse
@@ -232,9 +232,9 @@ class EllarCLIService:
         return self._store.root_module
 
     @_export_ellar_config_module
-    def get_application_context(self) -> ApplicationContext:
+    def get_application_context(self) -> t.AsyncGenerator[EllarInjector, t.Any]:
         app = t.cast(App, self.import_application())
-        return app.application_context()
+        return injector_context(app.injector)
 
 
 class EllarCLIServiceWithPyProject(EllarCLIService):

@@ -37,6 +37,7 @@ LOOP_CHOICES = eClick.Choice([key for key in LOOP_SETUPS.keys() if key != "none"
 INTERFACE_CHOICES = eClick.Choice(INTERFACES)
 
 
+@eClick.command(name="runserver", context_settings={"auto_envvar_prefix": "UVICORN"})
 @eClick.option(
     "--host",
     type=str,

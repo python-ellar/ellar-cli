@@ -71,12 +71,14 @@ class ModuleTemplateScaffold(FileTemplateScaffold):
         return template_context
 
 
+@eClick.command(name="create-module")
 @eClick.argument("module_name")
 @eClick.argument(
     "directory",
     help="The name of a new directory to scaffold the module into.",
     required=False,
 )
+@eClick.with_injector_context
 def create_module(module_name: str, directory: t.Optional[str]):
     """- Scaffolds Ellar Application Module -"""
 
