@@ -52,11 +52,11 @@ def create_ellar_cli(app_import_string: t.Optional[str] = None) -> click.Group:
         ctx.meta[ELLAR_PROJECT_NAME] = kwargs["project"]
 
     if not app_import_string:
-        _app_cli.command(name="new")(new_command)
-        _app_cli.command(name="create-project")(create_project)
+        _app_cli.add_command(new_command)
+        _app_cli.add_command(create_project)
 
-    _app_cli.command(context_settings={"auto_envvar_prefix": "UVICORN"})(runserver)
-    _app_cli.command(name="create-module")(create_module)
+    _app_cli.add_command(runserver)
+    _app_cli.add_command(create_module)
 
     return _app_cli  # type:ignore[no-any-return]
 

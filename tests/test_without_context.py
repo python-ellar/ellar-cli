@@ -10,14 +10,14 @@ def without_context_command():
 
 
 @app_cli.command()
-@click.run_as_async
+@click.run_as_sync
 async def without_context_command_async():
     print("Working outside context Async")
 
 
 @click.command()
 @click.argument("name")
-@click.run_as_async
+@click.run_as_sync
 async def print_name(name: str):
     click.echo(f"Hello {name}, this is an async command.")
 
@@ -43,6 +43,6 @@ def test_print_name_works(cli_runner):
 def test_run_as_async_fails():
     with pytest.raises(AssertionError):
 
-        @click.run_as_async
+        @click.run_as_sync
         def print_name_1(name: str):
             pass

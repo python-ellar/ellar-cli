@@ -1,4 +1,3 @@
-from ellar.app import current_injector
 from ellar.common import (
     IExecutionContext,
     IModuleSetup,
@@ -7,7 +6,7 @@ from ellar.common import (
     Response,
     exception_handler,
 )
-from ellar.core import Config, DynamicModule, ModuleBase
+from ellar.core import Config, DynamicModule, ModuleBase, current_injector
 from ellar.samples.modules import HomeModule
 
 import ellar_cli.click as click
@@ -18,7 +17,7 @@ class DynamicCommandModule(ModuleBase, IModuleSetup):
     @classmethod
     def setup(cls) -> "DynamicModule":
         @click.command()
-        @click.with_app_context
+        @click.with_injector_context
         def plain_project():
             """Project 2 Custom Command"""
             assert isinstance(current_injector.get(Config), Config)

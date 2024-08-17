@@ -130,6 +130,7 @@ class NewTemplateScaffold(FileTemplateScaffold):
         return os.path.join(self._working_directory, self._working_project_name)
 
 
+@eClick.command(name="new")
 @eClick.argument(
     "project_name",
     help="Project Module Name. Defaults to `project-name` if not set",
@@ -145,6 +146,7 @@ class NewTemplateScaffold(FileTemplateScaffold):
     default=False,
     help="Create a new without including `pyproject.toml`.",
 )
+@eClick.with_injector_context
 def new_command(project_name: str, directory: t.Optional[str], plain: bool):
     """- Runs a complete Ellar project scaffold and creates all files required for managing you application  -"""
     root_scaffold_template_path = new_template_template_path

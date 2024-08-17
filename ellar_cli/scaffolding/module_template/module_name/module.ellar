@@ -12,13 +12,13 @@
     base_directory=`default is the `{{module_name}}` folder`
 )
 class MyModule(ModuleBase):
-    def register_providers(self, container: Container) -> None:
+    def register_providers(self, moduleRef: ModuleRefBase) -> None:
         # for more complicated provider registrations
         pass
 
 """
 from ellar.common import Module
-from ellar.core import ModuleBase
+from ellar.core.modules import ModuleBase, ModuleRefBase
 from ellar.di import Container
 
 from .controllers import {{module_name | capitalize}}Controller
@@ -34,5 +34,5 @@ class {{module_name | capitalize}}Module(ModuleBase):
     {{module_name | capitalize}} Module
     """
 
-    def register_providers(self, container: Container) -> None:
+    def register_providers(self, moduleRef: ModuleRefBase) -> None:
         """for more complicated provider registrations, use container.register_instance(...) """

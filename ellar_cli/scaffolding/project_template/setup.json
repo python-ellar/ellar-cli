@@ -6,24 +6,6 @@
       "is_directory": "true",
       "files": [
         {
-          "name": "core",
-          "is_directory": "true",
-          "files": [
-            {
-              "name": "__init__.ellar"
-            }
-          ]
-        },
-        {
-          "name": "domain",
-          "is_directory": "true",
-          "files": [
-            {
-              "name": "__init__.ellar"
-            }
-          ]
-        },
-        {
           "name": "__init__.ellar"
         },
         {

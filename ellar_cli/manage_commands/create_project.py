@@ -106,6 +106,7 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
             print("Happy coding!")
 
 
+@eClick.command(name="create-project")
 @eClick.argument("project_name", help="Project Name")
 @eClick.argument(
     "directory",
@@ -119,6 +120,7 @@ class ProjectTemplateScaffold(FileTemplateScaffold):
     help="Create a new without including `pyproject.toml`.",
 )
 @eClick.pass_context
+@eClick.with_injector_context
 def create_project(
     ctx: eClick.Context, project_name: str, directory: t.Optional[str], plain: bool
 ):

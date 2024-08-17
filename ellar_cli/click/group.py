@@ -9,37 +9,41 @@ from ellar_cli.constants import ELLAR_META
 from ellar_cli.service import EllarCLIService, EllarCLIServiceWithPyProject
 
 from .command import Command
-from .util import with_app_context
+from .util import with_injector_context
 
 
 class AppContextGroup(click.Group):
     """This works similar to a regular click.Group, but it
     changes the behavior of the command decorator so that it
-    automatically wraps the functions in `pass_with_app_context`.
+    automatically wraps the functions in `with_injector_context`.
     """
 
     command_class = Command
 
-    def command(self, *args: t.Any, **kwargs: t.Any) -> t.Callable:  # type:ignore[override]
+    def command(  # type:ignore[override]
+        self, *args: t.Any, **kwargs: t.Any
+    ) -> t.Union[t.Callable[[t.Callable[..., t.Any]], click.Command], click.Command]:
         """The same with click.Group command.
-        It only decorates the command function to be run under `applicationContext`.
-        It's disabled by passing `with_app_context=False`.
+        It only decorates the command function to be run under `ellar.core.with_injector_context`.
+        It's disabled by passing `with_injector_context=False`.
         """
-        wrap_for_ctx = kwargs.pop("with_app_context", True)
+        wrap_for_ctx = kwargs.pop("with_injector_context", True)
 
         def decorator(f: t.Callable) -> t.Any:
             if wrap_for_ctx:
-                f = with_app_context(f)
-            return click.Group.command(self, *args, **kwargs)(f)
+                f = with_injector_context(f)
+            return super(AppContextGroup, self).command(*args, **kwargs)(f)
 
         return decorator
 
-    def group(self, *args: t.Any, **kwargs: t.Any) -> t.Any:
+    def group(  # type:ignore[override]
+        self, *args: t.Any, **kwargs: t.Any
+    ) -> t.Union[t.Callable[[t.Callable[..., t.Any]], click.Group], click.Group]:
         """This works exactly like the method of the same name on a regular click.Group but it defaults
         the group class to `AppGroup`.
         """
-        kwargs.setdefault("cls", AppContextGroup)
-        return click.Group.group(self, *args, **kwargs)
+        kwargs.setdefault("cls", self.__class__)
+        return super(AppContextGroup, self).group(*args, **kwargs)  # type:ignore[no-any-return]
 
 
 class EllarCommandGroup(AppContextGroup):
@@ -62,7 +66,9 @@ class EllarCommandGroup(AppContextGroup):
         if self._cli_meta:
             application = self._cli_meta.import_application()
 
-            module_configs = (i for i in application.injector.get_modules().keys())
+            module_configs = (
+                i for i in application.injector.tree_manager.modules.keys()
+            )
 
             ctx.meta[ELLAR_META] = self._cli_meta
         else:
@@ -77,12 +83,10 @@ class EllarCommandGroup(AppContextGroup):
             ctx.meta[ELLAR_META] = meta_
 
             if meta_ and meta_.has_meta:
-                module_configs = (
-                    module_config.module
-                    for module_config in AppFactory.get_all_modules(
-                        ModuleSetup(meta_.import_root_module())
-                    )
+                tree_manager = AppFactory.read_all_module(
+                    ModuleSetup(meta_.import_root_module())
                 )
+                module_configs = tree_manager.modules.keys()
         self._find_commands_from_modules(module_configs)
 
     def _find_commands_from_modules(

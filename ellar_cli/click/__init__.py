@@ -42,12 +42,12 @@ from click.utils import get_app_dir as get_app_dir
 from click.utils import get_binary_stream as get_binary_stream
 from click.utils import get_text_stream as get_text_stream
 from click.utils import open_file as open_file
-from ellar.threading import run_as_async
+from ellar.threading import run_as_sync
 
 from .argument import Argument
 from .command import Command
 from .group import AppContextGroup, EllarCommandGroup
-from .util import with_app_context
+from .util import with_injector_context
 
 
 def argument(
@@ -90,14 +90,14 @@ def group(
 
 __all__ = [
     "argument",
-    "run_as_async",
+    "run_as_sync",
     "command",
     "Argument",
     "Option",
     "option",
     "AppContextGroup",
     "EllarCommandGroup",
-    "with_app_context",
+    "with_injector_context",
     "Context",
     "Group",
     "Parameter",

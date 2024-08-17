@@ -1,5 +1,4 @@
-from ellar.app import current_injector
-from ellar.core import Config
+from ellar.core import Config, current_injector
 
 import ellar_cli.click as click
 
@@ -27,7 +26,7 @@ def say_hello():
 
 
 @db.command(name="command-with-context")
-@click.with_app_context
+@click.with_injector_context
 def command_with_app_context():
     print(
         f"Running a command with application context - {current_injector.get(Config).APPLICATION_NAME}"

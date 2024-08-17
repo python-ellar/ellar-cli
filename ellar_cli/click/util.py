@@ -10,9 +10,9 @@ from ellar_cli.constants import ELLAR_META
 from ellar_cli.service import EllarCLIService
 
 
-def with_app_context(f: t.Callable) -> t.Any:
+def with_injector_context(f: t.Callable) -> t.Any:
     """
-    Wraps a callback so that it's guaranteed to be executed with application context.
+    Wraps a callback so that it's guaranteed to be executed with `ellar.core.with_injector_context` contextmanager.
     """
 
     @click.pass_context
