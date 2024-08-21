@@ -179,7 +179,7 @@ class EllarCLIService:
             )
 
         if is_callable:
-            app = app()  # type:ignore[call-arg]
+            app = app()
 
             if not isinstance(app, App):
                 raise EllarCLIException(

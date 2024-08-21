@@ -1,9 +1,11 @@
+import inspect
 import typing as t
 
 import click
 from ellar.app import AppFactory
 from ellar.common.constants import MODULE_METADATA
 from ellar.core import ModuleBase, ModuleSetup, reflector
+from ellar.threading import run_as_sync
 
 from ellar_cli.constants import ELLAR_META
 from ellar_cli.service import EllarCLIService, EllarCLIServiceWithPyProject
@@ -30,6 +32,9 @@ class AppContextGroup(click.Group):
         wrap_for_ctx = kwargs.pop("with_injector_context", True)
 
         def decorator(f: t.Callable) -> t.Any:
+            if inspect.iscoroutinefunction(f):
+                f = run_as_sync(f)
+
             if wrap_for_ctx:
                 f = with_injector_context(f)
             return super(AppContextGroup, self).command(*args, **kwargs)(f)
