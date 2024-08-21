@@ -25,7 +25,7 @@ def version_callback(ctx: click.Context, _: t.Any, value: bool) -> None:
         raise click.Exit(0)
 
 
-def create_ellar_cli(app_import_string: t.Optional[str] = None) -> click.Group:
+def create_ellar_cli(app_import_string: t.Optional[str] = None) -> EllarCommandGroup:
     @click.group(
         name="Ellar CLI Tool... ",
         cls=EllarCommandGroup,
