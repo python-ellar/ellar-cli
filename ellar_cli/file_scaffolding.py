@@ -82,9 +82,9 @@ class FileTemplateScaffold:
 
     def on_scaffold_started(self) -> None:
         for context in self._schema.context:
-            assert (
-                self._ctx.get(context) is not None
-            ), f"{context} template context is missing."
+            assert self._ctx.get(context) is not None, (
+                f"{context} template context is missing."
+            )
 
     def create_directory(
         self,
