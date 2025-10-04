@@ -96,7 +96,7 @@ class EllarCLIService:
                     project
                 ) or ellar_py_projects.has_project(ellar_py_projects.default_project):
                     project_to_load = (
-                        project  # type: ignore
+                        project
                         if ellar_py_projects.has_project(project)
                         else ellar_py_projects.default_project
                     )
@@ -164,7 +164,7 @@ class EllarCLIService:
             fw.writelines(tomlkit_dumps(content))
 
     def _import_from_string(self) -> t.Union[App, t.Callable[..., App]]:
-        return import_from_string(self._meta.application)  # type:ignore[no-any-return]
+        return import_from_string(self._meta.application)
 
     def _import_and_validate_application(
         self,
