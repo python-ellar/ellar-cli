@@ -23,7 +23,7 @@ class Argument(click.Argument):
         self.hidden = hidden
 
     # overridden to customize the automatic formatting of metavars
-    def make_metavar(self, ctx: click.Context) -> str:
+    def make_metavar(self, *args: t.Any) -> str:
         if self.metavar is not None:
             return self.metavar
         var = "" if self.required else "["
