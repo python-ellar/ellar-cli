@@ -4,8 +4,8 @@ from ellar_cli.main import app_cli
 output_1 = """Usage: args-print <arg1> [<arg2>] [OPTIONS]
 
 ARGUMENTS:
-  arg1: <arg1>    Arg1 description  [required]
-  arg2: [<arg2>]  Arg2 description
+  arg1: <arg1>    Arg1 description  [default: Sentinel.UNSET; required]
+  arg2: [<arg2>]  Arg2 description  [default: Sentinel.UNSET]
 
 [OPTIONS]:
   --help  Show this message and exit.
@@ -14,8 +14,8 @@ ARGUMENTS:
 output_2 = """Usage: args-print-no-description <arg1> [<arg2>] [OPTIONS]
 
 ARGUMENTS:
-  arg1: <arg1>    [required]
-  arg2: [<arg2>]
+  arg1: <arg1>    [default: Sentinel.UNSET; required]
+  arg2: [<arg2>]  [default: Sentinel.UNSET]
 
 [OPTIONS]:
   --help  Show this message and exit.

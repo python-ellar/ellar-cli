@@ -19,7 +19,7 @@ def invoke_without_app_context():
 def test_app_group_is_of_type_application_context_group():
     assert isinstance(app_group, AppContextGroup)
     assert len(app_group.commands) == 1
-    assert "app-group" in app.commands
+    assert "app" in app.commands
 
 
 def test_invoke_without_app_context_fails(cli_runner):

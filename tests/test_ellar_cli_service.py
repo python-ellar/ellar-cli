@@ -12,15 +12,24 @@ from ellar_cli.service import (
 )
 from ellar_cli.service.pyproject import PY_PROJECT_TOML
 
-good_app_info = (
-    b"Usage: good_app.py [OPTIONS] COMMAND [ARGS]...\n\n  "
-    b"Ellar, ASGI Python Web framework\n\nOptions:\n  --project TEXT  "
-    b"Run Specific Command on a specific project  [default:\n                  "
-    b"default]\n  -v, --version   Show the version and exit.\n  --help          "
-    b"Show this message and exit.\n\nCommands:\n  create-module  - Scaffolds Ellar Application Module -\n  "
-    b"failing-1\n  failing-2\n  failing-3\n  runserver      - "
-    b"Starts Uvicorn Server -\n  working\n"
-)
+good_app_info = """Usage: good_app.py [OPTIONS] COMMAND [ARGS]...
+
+  Ellar, ASGI Python Web framework
+
+Options:
+  --project TEXT  Run Specific Command on a specific project  [default:
+                  default]
+  -v, --version   Show the version and exit.
+  --help          Show this message and exit.
+
+Commands:
+  create-module  - Scaffolds Ellar Application Module -
+  failing-1
+  failing-2
+  failing-3
+  runserver      - Starts Uvicorn Server -
+  working
+"""
 
 
 def test_import_project_meta_returns_default_when_py_project_is_none(tmp_path):
@@ -194,9 +203,11 @@ def test_version_works(write_empty_py_project, process_runner):
 
 
 def test_apps_good_app_cli_works(change_os_dir):
-    result = subprocess.run(["python", "apps/good_app.py"], stdout=subprocess.PIPE)
+    result = subprocess.run(
+        ["python", "apps/good_app.py", "--help"], stdout=subprocess.PIPE
+    )
     assert result.returncode == 0
-    assert result.stdout == good_app_info
+    assert result.stdout.decode("utf-8") == good_app_info
 
 
 def test_apps_good_app_working_command(change_os_dir):

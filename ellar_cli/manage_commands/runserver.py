@@ -14,7 +14,7 @@ from uvicorn.config import (
     LIFESPAN,
     LOG_LEVELS,
     LOGGING_CONFIG,
-    LOOP_SETUPS,
+    LOOP_FACTORIES,
     SSL_PROTOCOL_VERSION,
     WS_PROTOCOLS,
 )
@@ -33,7 +33,7 @@ HTTP_CHOICES = eClick.Choice(list(HTTP_PROTOCOLS.keys()))
 WS_CHOICES = eClick.Choice(list(WS_PROTOCOLS.keys()))
 
 LIFESPAN_CHOICES = eClick.Choice(list(LIFESPAN.keys()))
-LOOP_CHOICES = eClick.Choice([key for key in LOOP_SETUPS.keys() if key != "none"])
+LOOP_CHOICES = eClick.Choice([key for key in LOOP_FACTORIES.keys() if key != "none"])
 INTERFACE_CHOICES = eClick.Choice(INTERFACES)
 
 
@@ -101,7 +101,7 @@ INTERFACE_CHOICES = eClick.Choice(INTERFACES)
     "--loop",
     type=LOOP_CHOICES,
     default="auto",
-    help="Event loop implementation.",
+    help="Event loop factory implementation.",
     show_default=True,
 )
 @eClick.option(
