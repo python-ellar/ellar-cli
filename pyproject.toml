@@ -122,3 +122,7 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "ellar_cli.testing.*"
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "ellar_cli.click.argument"
+ignore_errors = true
