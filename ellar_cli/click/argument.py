@@ -23,7 +23,7 @@ class Argument(click.Argument):
         self.hidden = hidden
 
     # overridden to customize the automatic formatting of metavars
-    def make_metavar(self) -> str:
+    def make_metavar(self, ctx: click.Context) -> str:
         if self.metavar is not None:
             return self.metavar
         var = "" if self.required else "["
@@ -47,7 +47,7 @@ class Argument(click.Argument):
             if any_slashes:
                 # TODO: test
                 any_prefix_is_slash[:] = [True]
-            rv += ": " + self.make_metavar()
+            rv += ": " + self.make_metavar(ctx)
             return rv
 
         rv = [_write_opts(self.opts)]
